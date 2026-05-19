@@ -2013,8 +2013,7 @@ nav.scrolled {
         <button id="prev-ep-btn" class="panel-toggle" onclick="prevEpisode()" style="display:none;">⏮ Prev</button>
         <button id="next-ep-btn" class="panel-toggle" onclick="nextEpisode()" style="display:none;">⏭ Next</button>
         <button class="panel-toggle" onclick="skipSource()">🔄 Skip Source</button>
-        <button class="panel-toggle" onclick="document.getElementById('side-panel').classList.toggle('open')">☰ Episodes
-          & Servers</button>
+        <button class="panel-toggle" onclick="document.getElementById('side-panel').classList.toggle('open')">☰ Episodes & Servers</button>
       </div>
     </div>
 
@@ -3196,8 +3195,6 @@ function loadEmbed() {
   if (iframe) iframe.removeAttribute('sandbox');
   if (iframe) iframe.src = url;
 
-
-
   clearTimeout(failoverTimer);
   // When iframe loads: hide spinner
   iframe.onload = () => {
@@ -3212,25 +3209,51 @@ function loadEmbed() {
 }
 
 
-// God-Mode Ad Blocker (Requires Launch.bat Unlocked Mode)
+// God-Mode Ad Blocker & Enhancements (Requires Launch.bat Unlocked Mode)
 // If web security is disabled, we have full cross-origin access to the iframe's internals.
 const godModeTimer = setInterval(() => {
   try {
     const frameWin = iframe.contentWindow;
-    if (frameWin) {
-      // Attempting to access frameWin.document throws a DOMException if security is active.
-      const doc = frameWin.document;
+    if (!frameWin) return;
 
-      // If we reach here, God-Mode is active! Nuke the iframe's ability to open popups.
-      if (!frameWin._streamLocalGodMode) {
-        frameWin.open = function (url, name, specs) {
-          console.log('[Stream Local] God-Mode annihilated popup attempt:', url);
-          return null;
-        };
-        frameWin._streamLocalGodMode = true;
-        console.log('[Stream Local] God-Mode applied to iframe successfully.');
+    function injectGodMode(win) {
+      try {
+        const doc = win.document;
+        // 1. Annihilate popup attempts and intercept keyboard shortcuts
+        if (!win._streamLocalGodMode) {
+          win.open = function (url, name, specs) {
+            console.log('[Stream Local] God-Mode annihilated popup attempt:', url);
+            return null;
+          };
+          win.addEventListener('keydown', function(e) {
+            // Send keydown back to parent window
+            window.top.postMessage({ type: 'aether_keydown', key: e.key }, '*');
+          });
+          win._streamLocalGodMode = true;
+          console.log('[Stream Local] God-Mode applied to iframe successfully.');
+        }
+
+        // 2. Attach 'ended' listener to all videos for auto-play
+        const videos = doc.querySelectorAll('video');
+        videos.forEach(v => {
+          if (!v._streamLocalEndedAttached) {
+            v.addEventListener('ended', () => {
+              console.log('[Stream Local] Video ended in God-Mode, auto-playing next.');
+              window.top.postMessage({ type: 'video_ended' }, '*');
+            });
+            v._streamLocalEndedAttached = true;
+          }
+        });
+
+        // 3. Recurse into nested iframes (often used by streaming sites)
+        const frames = doc.querySelectorAll('iframe');
+        frames.forEach(f => injectGodMode(f.contentWindow));
+      } catch (err) {
+        // Expected if crossing origins without God Mode
       }
     }
+
+    injectGodMode(frameWin);
   } catch (e) {
     // Standard browser security is blocking access. God-Mode is inactive.
   }
@@ -3307,6 +3330,30 @@ function closePlayer() {
   if (getPlayerIframe()) getPlayerIframe().src = '';
   document.body.style.overflow = '';
   document.title = "Stream Local — Premium Streaming";
+  if (document.fullscreenElement) {
+    document.exitFullscreen().catch(()=>{});
+  }
+}
+
+function toggleFullscreen() {
+  const overlay = document.getElementById('player-overlay');
+  if (!document.fullscreenElement) {
+    if (overlay.requestFullscreen) {
+      overlay.requestFullscreen();
+    } else if (overlay.webkitRequestFullscreen) {
+      overlay.webkitRequestFullscreen();
+    } else if (overlay.msRequestFullscreen) {
+      overlay.msRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
 }
 
 function downloadSeasonBatch() {
@@ -3395,12 +3442,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         try { data = JSON.parse(data); } catch (err) { }
       }
-      if (data && (data.event === 'video_ended' || data.type === 'video_ended' || data.event === 'ended' || data.type === 'ended')) {
-        nextEpisode();
+      if (data) {
+        if (data.event === 'video_ended' || data.type === 'video_ended' || data.event === 'ended' || data.type === 'ended') {
+          nextEpisode();
+        } else if (data.type === 'aether_keydown' && data.key) {
+          handlePlayerKeydown(data.key);
+        }
       }
     } catch (err) { }
   });
+
+  // Global keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    // Ignore if typing in an input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    handlePlayerKeydown(e.key);
+  });
 });
+
+function handlePlayerKeydown(key) {
+  const overlay = document.getElementById('player-overlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  
+  const k = key.toLowerCase();
+  if (k === 'f') {
+    if (typeof toggleFullscreen === 'function') toggleFullscreen();
+  } else if (k === 'n') {
+    if (typeof nextEpisode === 'function') nextEpisode();
+  } else if (k === 'p') {
+    if (typeof prevEpisode === 'function') prevEpisode();
+  } else if (k === 'escape') {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      if (typeof closePlayer === 'function') closePlayer();
+    }
+  }
+}
 
 /* ===== SCROLL BEHAVIOR ===== */
 window.addEventListener('scroll', () => {
