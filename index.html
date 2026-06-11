@@ -1353,6 +1353,132 @@ nav.scrolled {
   transform: translateX(-50%) translateY(0);
 }
 
+/* ===== FULLSCREEN MODE ===== */
+#player-overlay.fullscreen {
+  z-index: 2147483647;
+}
+
+#player-overlay.fullscreen .iframe-container iframe {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Highlight ⛶ button when fullscreen is active */
+#player-overlay.fullscreen .panel-toggle[title="Fullscreen"] {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(196, 98, 58, 0.4);
+}
+
+/* F11 hint toast */
+#f11-hint {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 15px;
+  z-index: 2147483647;
+  opacity: 0;
+  transition: all 0.35s ease;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  white-space: nowrap;
+}
+
+#f11-hint.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== FLOATING NEXT EPISODE BUTTON ===== */
+.next-ep-floating {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  z-index: 25;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: rgba(229, 9, 20, 0.92);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(229, 9, 20, 0.35), 0 2px 8px rgba(0, 0, 0, 0.3);
+  animation: floatInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  pointer-events: auto;
+}
+
+.next-ep-floating:hover {
+  transform: scale(1.05);
+  background: rgba(244, 6, 18, 0.95);
+  box-shadow: 0 12px 40px rgba(229, 9, 20, 0.5);
+}
+
+.next-ep-floating:active {
+  transform: scale(0.97);
+}
+
+.next-ep-floating span {
+  font-size: 22px;
+  line-height: 1;
+}
+
+@keyframes floatInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Theme adapt: chill */
+[data-theme="chill"] .next-ep-floating {
+  background: rgba(99, 102, 241, 0.92);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.35);
+}
+[data-theme="chill"] .next-ep-floating:hover {
+  background: rgba(129, 140, 248, 0.95);
+  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.5);
+}
+
+/* Theme adapt: light */
+[data-theme="light"] .next-ep-floating {
+  background: rgba(196, 98, 58, 0.95);
+  box-shadow: 0 8px 32px rgba(196, 98, 58, 0.3);
+}
+[data-theme="light"] .next-ep-floating:hover {
+  background: rgba(212, 115, 74, 0.95);
+  box-shadow: 0 12px 40px rgba(196, 98, 58, 0.45);
+}
+
+/* Hide during idle */
+#player-overlay.inactive .next-ep-floating {
+  opacity: 0;
+  pointer-events: none !important;
+  transition: opacity 0.3s;
+}
+
+/* Style variant: modern (Outfit font, rounder) */
+[data-style="new"] .next-ep-floating {
+  border-radius: 100px;
+  padding: 14px 32px;
+}
+
 </style>
 
   
@@ -4858,6 +4984,486 @@ nav.scrolled {
 
 </style>
 
+  
+<style>
+/* ============================================================
+   SPORTS — Live Games Section
+   ============================================================ */
+
+/* --- Live Now section --- */
+.live-now-section {
+  margin-bottom: 8px;
+}
+
+.live-now-title {
+  color: #dc2626 !important;
+}
+
+.live-now-title::after {
+  background: #dc2626 !important;
+}
+
+.live-count-badge {
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(220, 38, 38, 0.15);
+  color: #dc2626;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-left: 8px;
+}
+
+.upcoming-count {
+  font-size: 12px;
+  color: var(--muted);
+  opacity: 0.6;
+  margin-left: 8px;
+}
+
+/* --- Live cards get a red border glow --- */
+.sports-card.is-live {
+  border-color: rgba(220, 38, 38, 0.3);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.08);
+}
+
+.sports-card.is-live:hover {
+  border-color: rgba(220, 38, 38, 0.5);
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.12), 0 16px 48px rgba(0,0,0,0.4);
+}
+
+/* ===== SPORTS PLAYER CONTROLS ===== */
+.sports-player-hint {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  z-index: 15;
+  border: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  max-width: 90%;
+}
+
+.sports-player-hint.visible {
+  opacity: 1;
+}
+
+.sports-player-hint span {
+  font-size: 18px;
+  margin-right: 6px;
+}
+
+/* Fullscreen toggle for sports player */
+#player-overlay .player-nav .sports-fs-btn {
+  display: none;
+}
+
+/* Show in sports mode */
+#player-overlay.sports-mode .player-nav .sports-fs-btn {
+  display: inline-flex;
+}
+
+/* --- Sports View --- */
+.sports-header {
+  padding: 140px 40px 30px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+}
+
+.sports-header .btn-secondary {
+  font-size: 13px;
+  padding: 8px 18px;
+  white-space: nowrap;
+}
+
+
+
+.sports-header h1 {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+
+.sports-header p {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.sports-league {
+  margin-bottom: 32px;
+  padding-left: 40px;
+}
+
+.sports-league .row-title {
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sports-grid {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 8px 0 20px;
+  padding-right: 40px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sports-grid::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- Sports Game Card --- */
+.sports-card {
+  flex: 0 0 300px;
+  min-width: 280px;
+  scroll-snap-align: start;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: sportCardIn 0.4s ease both;
+  animation-delay: calc(var(--card-index, 0) * 0.05s);
+}
+
+.sports-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+}
+
+.sports-card-inner {
+  padding: 24px 20px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Teams row */
+.sports-teams {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sports-team {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  flex: 1;
+  line-height: 1.2;
+}
+
+.sports-team.away {
+  opacity: 0.75;
+}
+
+.sports-score {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -1px;
+  min-width: 36px;
+  text-align: center;
+}
+
+.sports-vs {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* Status badges */
+.sports-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+
+.sports-badge.live {
+  background: #dc2626;
+  color: #fff;
+  animation: pulseLive 2s ease-in-out infinite;
+}
+
+.sports-badge.live::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  animation: blink 1s step-end infinite;
+}
+
+.sports-badge.upcoming {
+  background: rgba(255,255,255,0.08);
+  color: var(--muted);
+}
+
+.sports-badge.final {
+  background: rgba(255,255,255,0.06);
+  color: var(--muted);
+}
+
+@keyframes pulseLive {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Game info row */
+.sports-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.sports-league-label {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+
+.sports-time {
+  font-size: 12px;
+}
+
+/* Watch CTA */
+.sports-watch-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 0;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  transition: background 0.2s;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.sports-card:hover .sports-watch-btn {
+  background: rgba(255,255,255,0.10);
+}
+
+@keyframes sportCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Style variant: new (Redesign) --- */
+[data-style="new"] .sports-card {
+  border-radius: 20px;
+}
+
+[data-style="new"] .sports-team {
+  font-size: 17px;
+}
+
+[data-style="new"] .sports-header h1 {
+  font-size: 40px;
+  font-weight: 900;
+}
+
+/* --- Style variant: modern (Glassy) --- */
+[data-style="modern"] .sports-card {
+  background: linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.08));
+  border-radius: 16px;
+}
+
+[data-style="modern"] .sports-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 10%, var(--glass-specular, rgba(255,255,255,0.45)) 30%, var(--glass-specular, rgba(255,255,255,0.45)) 70%, transparent 90%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+[data-style="modern"] .sports-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(160deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 40%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 16px 16px 0 0;
+}
+
+[data-style="modern"] .sports-card-inner {
+  position: relative;
+  z-index: 1;
+}
+
+[data-style="modern"] .sports-watch-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+[data-style="modern"] .sports-card:hover .sports-watch-btn {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.10);
+}
+
+/* --- Style variant: premium --- */
+[data-style="premium"] .sports-card {
+  background: var(--prem-card, #12100e);
+  border: 1px solid var(--prem-border, rgba(245,240,235,0.06));
+  border-radius: 12px;
+}
+
+[data-style="premium"] .sports-team {
+  font-family: var(--font-display, 'Playfair Display', serif);
+  font-weight: 600;
+}
+
+[data-style="premium"] .sports-score {
+  font-family: var(--font-display, 'Playfair Display', serif);
+  font-weight: 700;
+}
+
+[data-style="premium"] .sports-card:hover {
+  border-color: var(--prem-border-accent, rgba(196,149,106,0.15));
+}
+
+[data-style="premium"] .sports-watch-btn {
+  border: 1px solid var(--prem-border-strong, rgba(245,240,235,0.10));
+  background: rgba(245,240,235,0.02);
+}
+
+[data-style="premium"] .sports-card:hover .sports-watch-btn {
+  background: rgba(245,240,235,0.04);
+  border-color: var(--prem-accent-dim, #8a7055);
+}
+
+[data-theme="light"] .sports-card {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .sports-card:hover {
+  border-color: rgba(0,0,0,0.12);
+}
+
+[data-theme="light"] .sports-watch-btn {
+  background: rgba(0,0,0,0.03);
+  border-color: rgba(0,0,0,0.06);
+  color: var(--text);
+}
+
+[data-theme="light"] .sports-card:hover .sports-watch-btn {
+  background: rgba(0,0,0,0.06);
+}
+
+[data-theme="chill"] .sports-badge.live {
+  background: #6366f1;
+}
+
+[data-theme="chill"] .sports-badge.live::before {
+  background: #fff;
+}
+
+@keyframes pulseLiveChill {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+}
+
+[data-theme="chill"] .sports-badge.live {
+  animation: pulseLiveChill 2s ease-in-out infinite;
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+  .sports-header {
+    padding: 120px 16px 24px;
+  }
+  .sports-header h1 {
+    font-size: 28px;
+  }
+  .sports-league {
+    padding-left: 16px;
+  }
+  .sports-grid {
+    padding-right: 16px;
+    gap: 10px;
+  }
+  .sports-card {
+    flex: 0 0 260px;
+    min-width: 240px;
+  }
+  .sports-team {
+    font-size: 14px;
+  }
+  .sports-score {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sports-header h1 {
+    font-size: 24px;
+  }
+  .sports-card {
+    flex: 0 0 230px;
+    min-width: 210px;
+  }
+  .sports-card-inner {
+    padding: 18px 14px 16px;
+  }
+  .sports-team {
+    font-size: 13px;
+  }
+  .sports-score {
+    font-size: 20px;
+    min-width: 28px;
+  }
+}
+
+</style>
+
 </head>
 
 <body>
@@ -4943,6 +5549,7 @@ nav.scrolled {
       <a class="nav-link active" id="nav-home" onclick="switchView('home')">Home</a>
       <a class="nav-link" id="nav-watchlist" onclick="switchView('watchlist')">My List</a>
       <a class="nav-link" id="nav-settings" onclick="switchView('settings')">Settings</a>
+      <a class="nav-link" id="nav-sports" onclick="toggleSportsMode()">⚽ Sports</a>
     </div>
     <div class="nav-search">
       <span class="s-icon">🔍</span>
@@ -5143,6 +5750,23 @@ nav.scrolled {
       </div>
 
       <div class="settings-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h3 style="margin: 0;">Sports Streaming Sources</h3>
+            <p style="margin: 4px 0 0 0;">Manage your sports stream providers. Uses <code>{game_id}</code> placeholder.</p>
+          </div>
+          <button class="btn btn-secondary" onclick="resetSportsSources()">Reset Defaults</button>
+        </div>
+        <div class="source-list" id="sports-source-list-ui"></div>
+        <div
+          style="background:var(--bg); padding:16px; border-radius:8px; display: flex; gap: 8px; margin-top: 16px; align-items: center;">
+          <input id="new-sports-src-name" class="input-base" placeholder="Name" style="flex: 1;" />
+          <input id="new-sports-src-url" class="input-base" placeholder="URL ({game_id})" style="flex: 3;" />
+          <button class="btn btn-secondary" onclick="addSportsSource()">Add</button>
+        </div>
+      </div>
+
+      <div class="settings-card">
         <h3>API Configuration</h3>
         <p>A TMDB API Key is required to fetch metadata. Get one for free at themoviedb.org.</p>
         <div class="input-group" style="margin-top: 16px;">
@@ -5168,6 +5792,28 @@ nav.scrolled {
     </div>
   </div>
 
+  <!-- SPORTS VIEW -->
+  <div id="view-sports" class="view" style="padding-top: 0;">
+    <div class="sports-header" id="sports-header">
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h1>Live & Upcoming Games</h1>
+          <p>Free live sports streams</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="sports-refresh-status" style="font-size:13px; color:var(--muted);"></span>
+          <button class="btn btn-secondary" onclick="refreshSportsGames()" style="padding:8px 18px; font-size:13px;">🔄 Refresh</button>
+        </div>
+      </div>
+    </div>
+    <div id="sports-content"></div>
+
+    <div style="text-align: center; padding: 40px 20px 20px; color: var(--muted); font-size: 12px; opacity: 0.7;">
+      Stream Local Sports — Free live sports streams from around the web.
+      Legal issues should be taken up with the third parties.
+    </div>
+  </div>
+
   <!-- PLAYER OVERLAY -->
   <div id="player-overlay">
     <!-- Mouse catchers to wake up UI when mouse hits edges -->
@@ -5188,8 +5834,9 @@ nav.scrolled {
         <button id="download-btn" class="panel-toggle" onclick="openDownloadModal()">📥 Download (BETA)</button>
         <button id="prev-ep-btn" class="panel-toggle" onclick="prevEpisode()" style="display:none;">⏮ Prev</button>
         <button id="next-ep-btn" class="panel-toggle" onclick="nextEpisode()" style="display:none;">⏭ Next</button>
+        <button class="panel-toggle sports-fs-btn" onclick="toggleSportsFullscreen()">⛶ Fullscreen</button>
         <button class="panel-toggle" onclick="skipSource()">🔄 Skip Source</button>
-        <button class="panel-toggle" onclick="document.getElementById('side-panel').classList.toggle('open')">☰ Episodes & Servers</button>
+        <button class="panel-toggle" onclick="document.getElementById('side-panel').classList.toggle('open')">☰ Episodes &amp; Servers</button>
       </div>
     </div>
 
@@ -5199,7 +5846,17 @@ nav.scrolled {
         <div style="font-size:14px; color:var(--muted);" id="embed-status">Connecting to server...</div>
       </div>
 
-      <iframe id="player-iframe" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+      <iframe id="player-iframe" allowfullscreen referrerpolicy="origin"></iframe>
+
+      <!-- Floating Next Episode button — appears at bottom-right when episode is almost over -->
+      <button id="next-ep-floating" class="next-ep-floating" style="display:none;" onclick="nextEpisode()">
+        <span>⏭</span> Next Episode
+      </button>
+
+      <!-- Sports player hint — shows instructions for sports streams -->
+      <div class="sports-player-hint" id="sports-player-hint">
+        <span>🖱️</span> Click inside the video to play &amp; unmute
+      </div>
     </div>
 
     <!-- SIDE PANEL -->
@@ -5223,6 +5880,9 @@ nav.scrolled {
         <div id="server-list"></div>
       </div>
     </div>
+
+    <!-- Fullscreen hint toast -->
+    <div id="f11-hint">⛶ Press F11 for true fullscreen (hides browser tabs)</div>
   </div>
 
   
@@ -5252,16 +5912,29 @@ const IMG_BG = 'https://image.tmdb.org/t/p/original';
 const DEFAULT_SOURCES = [
   { name: 'VidEasy', movie: 'https://player.videasy.net/movie/{id}?autoplay=1', tv: 'https://player.videasy.net/tv/{id}/{s}/{e}?autoplay=1' },
   { name: 'VidSrc CC', movie: 'https://vidsrc.cc/v2/embed/movie/{id}?autoPlay=true', tv: 'https://vidsrc.cc/v2/embed/tv/{id}/{s}/{e}?autoPlay=true' },
-  { name: '111Movies', movie: 'https://111movies.net/movie/{id}?autoplay=1', tv: 'https://111movies.net/tv/{id}/{s}/{e}?autoplay=1' }
+  { name: '111Movies', movie: 'https://111movies.net/movie/{id}?autoplay=1', tv: 'https://111movies.net/tv/{id}/{s}/{e}?autoplay=1' },
+  { name: 'ezvidapi', movie: 'https://ezvidapi.com/embed/movie/{id}?ref=streamlocal.app', tv: 'https://ezvidapi.com/embed/tv/{id}/{s}/{e}?ref=streamlocal.app' },
 ];
 
+const DEFAULT_SPORTS_SOURCES = [
+  { name: 'SportSRC', url: '' },  // Uses SportSRC API automatically
+  { name: 'StreamEast', url: 'https://newsport-tv.com/stream.html?id={game_id}&autoplay=1' },
+];
+
+let SPORTS_GAMES = [];
+let SPORTS_EMBED_CACHE = {}; // game_id -> embedUrl cache
+
 let SOURCES = [];
+let SPORTS_SOURCES = [];
 let TMDB_KEY = localStorage.getItem('tmdb_key') || atob('OWFmMDVjYTRmNWY3Y2IwZGQ4MTE5NzA0ZTIzYjUzNDU=').split('').reverse().join('');
 let currentMedia = null, currentSrc = 0, currentSeason = 1, currentEp = 1, allSeasons = [];
 let currentModalId = null, currentModalSeasons = [];
 let failoverTimer = null;
 let heroData = null;
 let idleTimer = null;
+let currentMode = 'home'; // 'home' | 'sports'
+let currentSportsGame = null;
+let currentSportSrc = 0;
 
 let preloadQueue = [];
 let isPreloading = false;
@@ -5372,6 +6045,391 @@ function resetSources() {
   saveSources();
 }
 
+/* ===== SPORTS SOURCES MANAGEMENT ===== */
+function loadSportsSources() {
+  const stored = localStorage.getItem('streamlocal_sports_sources');
+  if (stored) {
+    try { SPORTS_SOURCES = JSON.parse(stored); } catch (e) { SPORTS_SOURCES = [...DEFAULT_SPORTS_SOURCES]; }
+  } else {
+    SPORTS_SOURCES = [...DEFAULT_SPORTS_SOURCES];
+  }
+  if (SPORTS_SOURCES.length === 0) SPORTS_SOURCES = [...DEFAULT_SPORTS_SOURCES];
+}
+
+function saveSportsSources() {
+  localStorage.setItem('streamlocal_sports_sources', JSON.stringify(SPORTS_SOURCES));
+}
+
+function addSportsSource() {
+  const name = document.getElementById('new-sports-src-name').value.trim();
+  const url = document.getElementById('new-sports-src-url').value.trim();
+  if (!name || !url) return alert("Provide a name and URL template with {game_id}.");
+  if (!url.includes('{game_id}')) return alert("URL must contain {game_id} placeholder.");
+  SPORTS_SOURCES.push({ name, url });
+  saveSportsSources();
+  document.getElementById('new-sports-src-name').value = '';
+  document.getElementById('new-sports-src-url').value = '';
+  renderSportsSourceSettings();
+}
+
+function deleteSportsSource(index) {
+  SPORTS_SOURCES.splice(index, 1);
+  if (SPORTS_SOURCES.length === 0) SPORTS_SOURCES = [...DEFAULT_SPORTS_SOURCES];
+  saveSportsSources();
+  renderSportsSourceSettings();
+}
+
+function moveSportsSource(index, direction) {
+  if (index + direction < 0 || index + direction >= SPORTS_SOURCES.length) return;
+  const temp = SPORTS_SOURCES[index];
+  SPORTS_SOURCES[index] = SPORTS_SOURCES[index + direction];
+  SPORTS_SOURCES[index + direction] = temp;
+  saveSportsSources();
+  renderSportsSourceSettings();
+}
+
+function resetSportsSources() {
+  SPORTS_SOURCES = [...DEFAULT_SPORTS_SOURCES];
+  saveSportsSources();
+  renderSportsSourceSettings();
+}
+
+function renderSportsSourceSettings() {
+  const list = document.getElementById('sports-source-list-ui');
+  if (!list) return;
+  list.innerHTML = SPORTS_SOURCES.map((src, i) => `
+    <div class="source-item">
+      <div><strong>${src.name}</strong></div>
+      <div style="display:flex; gap: 12px; align-items:center;">
+        <button class="del-btn" style="color: var(--muted); ${i === 0 ? 'opacity: 0.3; cursor: default;' : ''}" onclick="moveSportsSource(${i}, -1)" ${i === 0 ? 'disabled' : ''}>▲</button>
+        <button class="del-btn" style="color: var(--muted); ${i === SPORTS_SOURCES.length - 1 ? 'opacity: 0.3; cursor: default;' : ''}" onclick="moveSportsSource(${i}, 1)" ${i === SPORTS_SOURCES.length - 1 ? 'disabled' : ''}>▼</button>
+        <button class="del-btn" onclick="deleteSportsSource(${i})">X</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ===== SPORTS API (SportSRC) ===== */
+const SPORTSRC_API = 'https://api.sportsrc.org/';
+
+// Map SportSRC categories to display leagues
+const SPORTSRC_CATEGORIES = [
+  { cat: 'football', league: 'Soccer' },
+  { cat: 'basketball', league: 'NBA' },
+  { cat: 'nfl', league: 'NFL' },
+  { cat: 'mma', league: 'UFC' },
+  { cat: 'hockey', league: 'NHL' },
+  { cat: 'baseball', league: 'MLB' },
+];
+
+function loadSportsGames() {
+  // No localStorage — always fetch fresh from SportSRC
+  SPORTS_GAMES = [];
+}
+
+function saveSportsGames() {
+  // Not needed — data is live from API
+}
+
+/* ===== FETCH LIVE GAMES FROM SPORTSRC ===== */
+async function fetchLiveSportsGames() {
+  const allGames = [];
+  const fetchPromises = SPORTSRC_CATEGORIES.map(async ({ cat, league }) => {
+    try {
+      const resp = await fetch(`${SPORTSRC_API}?data=matches&category=${cat}`, { signal: AbortSignal.timeout(10000) });
+      if (!resp.ok) return;
+      const json = await resp.json();
+      if (!json.success || !json.data) return;
+      
+      json.data.forEach(match => {
+        const now = Date.now();
+        const matchTime = match.date || 0;
+        const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
+        // "Live" = started within last 4 hours OR starting within next 1 hour
+        const isLive = (matchTime <= now && matchTime > now - FOUR_HOURS_MS) ||
+                       (matchTime > now && matchTime < now + 3600000);
+        const isUpcoming = matchTime > now + 3600000;
+        
+        // Format time nicely
+        let timeStr = '';
+        if (isLive) {
+          timeStr = '🔴 LIVE';
+        } else if (matchTime) {
+          const d = new Date(matchTime);
+          const now2 = new Date();
+          const isToday = d.toDateString() === now2.toDateString();
+          const isTomorrow = new Date(now2.getTime() + 86400000).toDateString() === d.toDateString();
+          if (isToday) timeStr = `Today ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+          else if (isTomorrow) timeStr = `Tomorrow ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+          else timeStr = d.toLocaleDateString([], {month:'short', day:'numeric'}) + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
+        
+        allGames.push({
+          src: 'sportsrc',
+          league: league,
+          category: cat,
+          game_id: match.id,
+          home: match.teams?.home?.name || match.title?.split(' vs ')[0] || 'Team',
+          away: match.teams?.away?.name || match.title?.split(' vs ')[1] || '',
+          status: isLive ? 'live' : isUpcoming ? 'upcoming' : 'final',
+          time: timeStr,
+          sortTime: matchTime,
+          poster: match.poster || '',
+        });
+      });
+    } catch (err) {}
+  });
+
+  await Promise.allSettled(fetchPromises);
+  
+  // Sort: live first, then by sortTime ascending
+  allGames.sort((a, b) => {
+    if (a.status === 'live' && b.status !== 'live') return -1;
+    if (a.status !== 'live' && b.status === 'live') return 1;
+    if (a.status === 'live' && b.status === 'live') return (a.sortTime || 0) - (b.sortTime || 0);
+    return (a.sortTime || 0) - (b.sortTime || 0);
+  });
+
+  if (allGames.length > 0) {
+    SPORTS_GAMES = allGames;
+    return allGames;
+  }
+  return null;
+}
+
+/* ===== FETCH EMBED URL FROM SPORTSRC ===== */
+async function fetchSportSRCEmbed(gameId, category) {
+  const cacheKey = `${category}:${gameId}`;
+  if (SPORTS_EMBED_CACHE[cacheKey]) return SPORTS_EMBED_CACHE[cacheKey];
+
+  try {
+    const resp = await fetch(`${SPORTSRC_API}?data=detail&category=${category}&id=${encodeURIComponent(gameId)}`, {
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!resp.ok) return null;
+    const json = await resp.json();
+    if (!json.success || !json.data?.sources?.length) return null;
+
+    // Pick the first HD source
+    const src = json.data.sources.find(s => s.hd) || json.data.sources[0];
+    if (src?.embedUrl) {
+      SPORTS_EMBED_CACHE[cacheKey] = src.embedUrl;
+      return src.embedUrl;
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function refreshSportsGames() {
+  const statusEl = document.getElementById('sports-refresh-status');
+  if (statusEl) statusEl.textContent = 'Refreshing...';
+
+  const games = await fetchLiveSportsGames();
+  const liveCount = SPORTS_GAMES.filter(g => g.status === 'live').length;
+
+  if (statusEl) {
+    if (games) {
+      statusEl.textContent = `📡 ${games.length} games (${liveCount} live)`;
+      setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 4000);
+    } else {
+      statusEl.textContent = '⚠️ Could not load — try again';
+      setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 4000);
+    }
+  }
+
+  if (currentMode === 'sports') loadSports();
+}
+
+/* ===== MODE SWITCHING ===== */
+function switchMode(mode) {
+  if (mode === currentMode) return;
+  currentMode = mode;
+
+  // Update search placeholder
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.placeholder = mode === 'sports' ? 'Search teams, leagues...' : 'Titles, people, genres';
+  }
+
+  if (mode === 'sports') {
+    switchView('sports');
+    loadSports();
+  } else {
+    switchView('home');
+    if (TMDB_KEY) loadHome();
+  }
+
+  // Update nav active state — highlight sports link when in sports mode
+  const navSports = document.getElementById('nav-sports');
+  if (navSports) {
+    navSports.classList.toggle('active', mode === 'sports');
+    navSports.textContent = mode === 'sports' ? '🎬 Home' : '⚽ Sports';
+  }
+}
+
+function toggleSportsMode() {
+  switchMode(currentMode === 'sports' ? 'home' : 'sports');
+}
+
+function toggleSportsFullscreen() {
+  const overlay = document.getElementById('player-overlay');
+  if (overlay.classList.contains('fullscreen')) {
+    overlay.classList.remove('fullscreen');
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+  } else {
+    overlay.classList.add('fullscreen');
+    if (overlay.requestFullscreen) {
+      overlay.requestFullscreen().catch(() => {});
+    } else if (overlay.webkitRequestFullscreen) {
+      overlay.webkitRequestFullscreen();
+    }
+  }
+}
+
+function showSportsPlayerHint() {
+  const hint = document.getElementById('sports-player-hint');
+  if (!hint) return;
+  hint.classList.add('visible');
+  clearTimeout(window._sportsHintTimer);
+  window._sportsHintTimer = setTimeout(() => {
+    hint.classList.remove('visible');
+  }, 5000);
+}
+
+/* ===== SPORTS PLAYER ===== */
+function openSportsGame(gameId) {
+  const game = SPORTS_GAMES.find(g => g.game_id === gameId) || SPORTS_GAMES[0];
+  if (!game) return alert("Game not found.");
+
+  currentSportsGame = game;
+  currentSportSrc = 0;
+
+  const title = game.away ? `${game.home} vs ${game.away}` : game.home;
+  document.getElementById('player-title').textContent = title;
+
+  // Open player — add sports-mode class
+  playerOpenTime = Date.now();
+  document.body.style.overflow = 'hidden';
+  const overlay = document.getElementById('player-overlay');
+  overlay.classList.add('open', 'sports-mode');
+  overlay.classList.remove('inactive');
+  document.getElementById('side-panel').classList.remove('open');
+  document.getElementById('player-iframe').src = '';
+  document.getElementById('embed-loading').style.display = 'flex';
+
+  renderSportsPlayerPanel();
+
+  // Try SportSRC embed first
+  if (game.src === 'sportsrc' && game.category) {
+    document.getElementById('embed-status').textContent = 'Fetching stream...';
+    fetchSportSRCEmbed(game.game_id, game.category).then(embedUrl => {
+      if (embedUrl) {
+        currentSportsGame._embedUrl = embedUrl;
+        loadSportsEmbedDirect(embedUrl);
+      } else {
+        // Fallback to manual sources
+        currentSportsGame._embedUrl = null;
+        loadSportsEmbed();
+      }
+    });
+  } else {
+    loadSportsEmbed();
+  }
+}
+
+function renderSportsPlayerPanel() {
+  const title = currentSportsGame.away
+    ? `${currentSportsGame.home} vs ${currentSportsGame.away}`
+    : currentSportsGame.home;
+  const label = currentSportsGame.status === 'live' ? '🔴 LIVE' : '';
+  document.getElementById('player-title').textContent = label ? `${title} ${label}` : title;
+  document.title = `${title} — Stream Local Sports`;
+
+  // Servers — show available sources
+  const servHtml = SPORTS_SOURCES
+    .filter(s => s.url) // skip SportSRC (it has empty url)
+    .map((x, i) =>
+      `<button class="server-btn ${i === currentSportSrc ? 'active' : ''}" onclick="switchSportsSource(${i})">${x.name}</button>`
+    ).join('');
+  document.getElementById('server-list').innerHTML = servHtml || '<div style="color:var(--muted);padding:10px;font-size:13px;">No fallback sources configured.</div>';
+
+  // Hide TV controls and download button in sports mode
+  document.getElementById('panel-tv-controls').style.display = 'none';
+  document.getElementById('prev-ep-btn').style.display = 'none';
+  document.getElementById('next-ep-btn').style.display = 'none';
+  document.getElementById('download-btn').style.display = 'none';
+
+  // Show sports fullscreen button
+  const fsBtn = document.querySelector('.sports-fs-btn');
+  if (fsBtn) fsBtn.style.display = 'inline-flex';
+}
+
+function loadSportsEmbedDirect(embedUrl) {
+  const iframe = document.getElementById('player-iframe');
+  document.getElementById('embed-loading').style.display = 'flex';
+  document.getElementById('embed-status').textContent = 'Connecting to SportSRC...';
+  iframe.src = embedUrl;
+
+  clearTimeout(failoverTimer);
+  iframe.onload = () => {
+    document.getElementById('embed-loading').style.display = 'none';
+    setTimeout(showSportsPlayerHint, 500);
+  };
+  failoverTimer = setTimeout(() => {
+    if (document.getElementById('embed-loading').style.display !== 'none') {
+      document.getElementById('embed-status').textContent = 'SportSRC timed out — try a fallback source';
+      setTimeout(() => document.getElementById('embed-loading').style.display = 'none', 2000);
+    }
+  }, 10000);
+}
+
+function loadSportsEmbed() {
+  const fallbacks = SPORTS_SOURCES.filter(s => s.url);
+  if (fallbacks.length === 0) {
+    document.getElementById('embed-loading').style.display = 'none';
+    document.getElementById('embed-status').textContent = 'No stream sources available. Add some in Settings.';
+    return;
+  }
+
+  const src = fallbacks[currentSportSrc % fallbacks.length];
+  const url = src.url.replace(/\{game_id\}/g, currentSportsGame.game_id);
+
+  if (!url) { switchSportsSource(1); return; }
+
+  const iframe = document.getElementById('player-iframe');
+  document.getElementById('embed-loading').style.display = 'flex';
+  document.getElementById('embed-status').textContent = `Connecting to ${src.name}...`;
+  iframe.src = url;
+
+  clearTimeout(failoverTimer);
+  iframe.onload = () => {
+    document.getElementById('embed-loading').style.display = 'none';
+  };
+
+  failoverTimer = setTimeout(() => {
+    if (document.getElementById('embed-loading').style.display !== 'none') {
+      switchSportsSource(1);
+    }
+  }, 8000);
+}
+
+function switchSportsSource(idx) {
+  const fallbacks = SPORTS_SOURCES.filter(s => s.url);
+  currentSportSrc = idx % (fallbacks.length || 1);
+  renderSportsPlayerPanel();
+  loadSportsEmbed();
+}
+
+function skipSportsSource() {
+  const fallbacks = SPORTS_SOURCES.filter(s => s.url);
+  currentSportSrc = (currentSportSrc + 1) % (fallbacks.length || 1);
+  switchSportsSource(currentSportSrc);
+}
+
 /* ===== PROFILE EXPORT / IMPORT ===== */
 function exportProfile() {
   const data = {
@@ -5379,7 +6437,9 @@ function exportProfile() {
     aether_v4_sources: localStorage.getItem('aether_v4_sources'),
     aether_v2_history: localStorage.getItem('aether_v2_history'),
     aether_v2_watchlist: localStorage.getItem('aether_v2_watchlist'),
-    aether_v2_last_source: localStorage.getItem('aether_v2_last_source')
+    aether_v2_last_source: localStorage.getItem('aether_v2_last_source'),
+    streamlocal_sports_sources: localStorage.getItem('streamlocal_sports_sources'),
+    streamlocal_sports_games: localStorage.getItem('streamlocal_sports_games')
   };
   const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -5401,6 +6461,8 @@ function importProfile(e) {
       if (data.aether_v2_history) localStorage.setItem('aether_v2_history', data.aether_v2_history);
       if (data.aether_v2_watchlist) localStorage.setItem('aether_v2_watchlist', data.aether_v2_watchlist);
       if (data.aether_v2_last_source) localStorage.setItem('aether_v2_last_source', data.aether_v2_last_source);
+      if (data.streamlocal_sports_sources) localStorage.setItem('streamlocal_sports_sources', data.streamlocal_sports_sources);
+      if (data.streamlocal_sports_games) localStorage.setItem('streamlocal_sports_games', data.streamlocal_sports_games);
       alert('Profile imported successfully! Reloading...');
       window.location.reload();
     } catch (err) {
@@ -5442,32 +6504,33 @@ const searchResultsEl = document.getElementById('search-results');
 searchInput.addEventListener('input', function () {
   clearTimeout(searchTimeout); const q = this.value.trim();
   if (!q || q.length < 2) return searchResultsEl.classList.remove('open');
-  searchTimeout = setTimeout(() => doSearch(q), 300);
+  if (currentMode === 'sports') {
+    searchTimeout = setTimeout(() => doSportsSearch(q), 200);
+  } else {
+    searchTimeout = setTimeout(() => doSearch(q), 300);
+  }
 });
 searchInput.addEventListener('keydown', function (e) {
   if (e.key === 'Enter') {
     e.preventDefault();
+    const q = this.value.trim();
     searchResultsEl.classList.remove('open');
     this.blur();
-    
-    // Reset filters
-    const filterType = document.getElementById('filter-type');
-    const filterGenre = document.getElementById('filter-genre');
-    const filterSort = document.getElementById('filter-sort');
-    const filterYear = document.getElementById('filter-year');
-    
-    if (filterType) filterType.value = '';
-    if (filterGenre) filterGenre.value = '';
-    if (filterSort) filterSort.value = 'popularity.desc';
-    if (filterYear) filterYear.value = '';
 
-    const q = this.value.trim();
-    if (q) {
-      doFullSearch(q);
+    if (currentMode === 'sports') {
+      if (q) doSportsFullSearch(q);
     } else {
-      switchView('search');
-      document.getElementById('full-search-title').textContent = 'Discover';
-      applySearchFilters(1);
+      // Reset filters
+      const filterType = document.getElementById('filter-type');
+      const filterGenre = document.getElementById('filter-genre');
+      const filterSort = document.getElementById('filter-sort');
+      const filterYear = document.getElementById('filter-year');
+      if (filterType) filterType.value = '';
+      if (filterGenre) filterGenre.value = '';
+      if (filterSort) filterSort.value = 'popularity.desc';
+      if (filterYear) filterYear.value = '';
+      if (q) doFullSearch(q);
+      else { switchView('search'); document.getElementById('full-search-title').textContent = 'Discover'; applySearchFilters(1); }
     }
   }
 });
@@ -5499,7 +6562,13 @@ searchResultsEl.addEventListener('touchend', function (e) {
 // Event delegation for search result clicks — works reliably on both mobile and desktop
 searchResultsEl.addEventListener('click', function (e) {
   const item = e.target.closest('.sr-item');
-  if (item && item.dataset.id && item.dataset.type) {
+  if (!item) return;
+  if (item.dataset.sportsGame) {
+    searchResultsEl.classList.remove('open');
+    searchInput.blur();
+    isSearchResultInteraction = false;
+    openSportsGame(item.dataset.sportsGame);
+  } else if (item.dataset.id && item.dataset.type) {
     searchResultsEl.classList.remove('open');
     searchInput.blur();
     isSearchResultInteraction = false;
@@ -5711,6 +6780,67 @@ window.browseCategory = function(category, extra) {
   applySearchFilters();
 };
 
+/* ===== SPORTS SEARCH ===== */
+function doSportsSearch(q) {
+  const ql = q.toLowerCase();
+  const results = SPORTS_GAMES.filter(g =>
+    g.home.toLowerCase().includes(ql) ||
+    g.away.toLowerCase().includes(ql) ||
+    g.league.toLowerCase().includes(ql)
+  ).slice(0, 8);
+
+  const el = document.getElementById('search-results');
+  if (results.length === 0) {
+    el.innerHTML = '<div class="sr-item" style="color:var(--muted);">No sports matches</div>';
+  } else {
+    el.innerHTML = results.map(g => {
+      const label = g.away ? `${g.away} vs ${g.home}` : g.home;
+      const meta = `${g.league} • ${g.status === 'live' ? '🔴 LIVE' : g.time}`;
+      return `<div class="sr-item" data-sports-game="${g.game_id}">
+        <div style="padding:4px 0;">
+          <div class="sr-title">${label}</div>
+          <div class="sr-meta">${meta}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  el.classList.add('open');
+}
+
+function doSportsFullSearch(q) {
+  const ql = q.toLowerCase();
+  const results = SPORTS_GAMES.filter(g =>
+    g.home.toLowerCase().includes(ql) ||
+    g.away.toLowerCase().includes(ql) ||
+    g.league.toLowerCase().includes(ql)
+  );
+
+  if (results.length === 0) {
+    alert('No sports matches found for "' + q + '"');
+    return;
+  }
+
+  // Switch to sports view and scroll to matching game
+  if (currentMode !== 'sports') switchMode('sports');
+
+  // Highlight first match or just reload sports view
+  loadSports();
+  
+  // Scroll to the first matching game card after render
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.sports-card');
+    for (const card of cards) {
+      const text = card.textContent.toLowerCase();
+      if (text.includes(ql)) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.style.outline = '2px solid var(--accent)';
+        setTimeout(() => { card.style.outline = ''; }, 2000);
+        break;
+      }
+    }
+  }, 300);
+}
+
 </script>
 
   
@@ -5761,6 +6891,165 @@ function renderCarousel(id, results, type) {
     `;
     container.appendChild(card);
   });
+}
+
+/* ===== SPORTS VIEW ===== */
+let sportsLastFetched = 0;
+
+function loadSports(forceFetch = false) {
+  const now = Date.now();
+  if (forceFetch || !sportsLastFetched || (now - sportsLastFetched > 300000)) {
+    sportsLastFetched = now;
+    fetchLiveSportsGames().then(games => {
+      renderSportsView();
+    }).catch(() => renderSportsView());
+  } else {
+    renderSportsView();
+  }
+}
+
+function renderSportsView() {
+  const container = document.getElementById('sports-content');
+  if (!container) return;
+
+  const liveGames = SPORTS_GAMES.filter(g => g.status === 'live');
+  const upcomingGames = SPORTS_GAMES.filter(g => g.status !== 'live');
+
+  const leagues = {};
+  upcomingGames.forEach(game => {
+    if (!leagues[game.league]) leagues[game.league] = [];
+    leagues[game.league].push(game);
+  });
+
+  const leagueEmojis = { NFL: '🏈', NBA: '🏀', Soccer: '⚽', UFC: '🥊', MLB: '⚾', NHL: '🏒' };
+
+  let html = '';
+
+  if (liveGames.length > 0) {
+    html += `
+      <div class="sports-league live-now-section">
+        <div class="row-header">
+          <h2 class="row-title live-now-title">🔴 Live Now</h2>
+          <span class="live-count-badge">${liveGames.length} game${liveGames.length > 1 ? 's' : ''}</span>
+        </div>
+        <div class="sports-grid" id="sports-grid-live">
+          ${liveGames.map((game, gi) => renderSportGameCard(game, gi)).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  html += Object.keys(leagues).map((league) => {
+    const games = leagues[league];
+    const emoji = leagueEmojis[league] || '🏆';
+    return `
+      <div class="sports-league">
+        <div class="row-header">
+          <h2 class="row-title">${emoji} ${league}</h2>
+          <span class="upcoming-count">${games.length} upcoming</span>
+        </div>
+        <div class="sports-grid" id="sports-grid-${league.toLowerCase()}">
+          ${games.map((game, gi) => renderSportGameCard(game, gi)).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (SPORTS_GAMES.length === 0) {
+    const liveCount = SPORTS_GAMES.filter(g => g.status === 'live').length;
+    html = `
+      <div style="text-align:center; padding:60px 20px; color:var(--muted);">
+        <div style="font-size:48px; margin-bottom:16px;">🏟️</div>
+        <h3 style="margin-bottom:8px;">No live games right now</h3>
+        <p style="font-size:14px;">Click <strong>Refresh</strong> to check again or try a different source in Settings.</p>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+
+  const liveCount = SPORTS_GAMES.filter(g => g.status === 'live').length;
+  const headerEl = document.getElementById('sports-header');
+  if (headerEl) {
+    const titleEl = headerEl.querySelector('h1');
+    const subtitleEl = headerEl.querySelector('p');
+    if (titleEl) {
+      titleEl.textContent = liveCount > 0
+        ? `🔴 ${liveCount} Game${liveCount > 1 ? 's' : ''} Live Now`
+        : 'Live & Upcoming Games';
+    }
+    if (subtitleEl) subtitleEl.textContent = `${SPORTS_GAMES.length} games loaded`;
+  }
+}
+
+function renderSportGameCard(game, index, isLiveCard = false) {
+  const statusLabel = game.status === 'live' ? 'LIVE'
+    : game.status === 'upcoming' ? 'UPCOMING' : 'FINAL';
+  const statusClass = game.status;
+
+  // Build teams HTML
+  const hasAway = game.away && game.away.trim() !== '';
+  const teamsHtml = hasAway ? `
+    <div class="sports-team away">${game.away}</div>
+    <div class="sports-vs">vs</div>
+    <div class="sports-team">${game.home}</div>
+  ` : `
+    <div class="sports-team" style="flex: 0 1 auto; width:100%;">${game.home}</div>
+  `;
+
+  return `
+    <div class="sports-card ${game.status === 'live' ? 'is-live' : ''}" onclick="openSportsGame('${game.game_id}')" style="--card-index: ${index};">
+      <div class="sports-card-inner">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+          <div class="sports-badge ${statusClass}">${statusLabel}</div>
+          <span class="sports-league-label">${game.league}</span>
+        </div>
+        <div class="sports-teams">${teamsHtml}</div>
+        <div class="sports-meta" style="margin-top:12px; margin-bottom:14px;">
+          <span class="sports-time">${game.time}</span>
+        </div>
+        <div class="sports-watch-btn">
+          ${game.status === 'live' ? '▶ Watch Live' : game.status === 'upcoming' ? '⏰ Set Reminder' : '📺 Watch Replay'}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSportGameCard(game, index) {
+  const statusLabel = game.status === 'live' ? 'LIVE'
+    : game.status === 'upcoming' ? 'UPCOMING' : 'FINAL';
+  const statusClass = game.status;
+  const scoreDisplay = game.score || '';
+  const timeDisplay = game.score ? game.time : game.time;
+
+  // Build teams HTML — if away is empty (UFC events etc), use single team display
+  const hasAway = game.away && game.away.trim() !== '';
+  const teamsHtml = hasAway ? `
+    <div class="sports-team away">${game.away}</div>
+    <div class="sports-score">${scoreDisplay.split('-')[0] || ''}</div>
+    <div class="sports-vs">vs</div>
+    <div class="sports-score">${scoreDisplay.split('-')[1] || ''}</div>
+    <div class="sports-team">${game.home}</div>
+  ` : `
+    <div class="sports-team" style="flex: 0 1 auto;">${game.home}</div>
+  `;
+
+  return `
+    <div class="sports-card" onclick="openSportsGame('${game.game_id}')" style="--card-index: ${index};">
+      <div class="sports-card-inner">
+        <div class="sports-badge ${statusClass}">${statusLabel}</div>
+        <div class="sports-teams">${teamsHtml}</div>
+        <div class="sports-meta">
+          <span class="sports-league-label">${game.league}</span>
+          <span class="sports-time">${timeDisplay}</span>
+        </div>
+        <div class="sports-watch-btn">
+          ${game.status === 'live' ? '▶' : game.status === 'upcoming' ? '⏰' : '📺'} Watch ${game.status === 'live' ? 'Live' : game.status === 'upcoming' ? 'When Live' : 'Replay'}
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 /* ===== WATCHLIST ===== */
@@ -6159,6 +7448,8 @@ function loadHistory() {
 <script>
 /* ===== MANUAL & PLAYER ===== */
 let playerOpenTime = 0;
+let nextEpProgressTimer = null;
+const TV_ESTIMATED_SECONDS = 2700; // default 45 min for TV episodes (used when we can't detect actual video progress inside cross-origin iframes)
 
 function buildStreamUrl(srcObj, type, id, s, e) {
   if (!srcObj) return '';
@@ -6167,6 +7458,7 @@ function buildStreamUrl(srcObj, type, id, s, e) {
 }
 
 async function openMedia(id, type, inS = null, inE = null) {
+  stopNextEpTracking();
   playerOpenTime = Date.now();
   document.body.style.overflow = 'hidden'; // prevent background scrolling
   document.getElementById('player-overlay').classList.add('open');
@@ -6272,6 +7564,9 @@ function loadEmbed() {
       skipSource();
     }
   }, 8000);
+
+  // Start next-episode auto-detection (TV only, estimate-based)
+  startNextEpTracking();
 }
 
 
@@ -6285,8 +7580,12 @@ function switchSource(idx) {
 }
 
 function skipSource() {
-  currentSrc = (currentSrc + 1) % SOURCES.length;
-  switchSource(currentSrc);
+  if (currentMode === 'sports') {
+    skipSportsSource();
+  } else {
+    currentSrc = (currentSrc + 1) % SOURCES.length;
+    switchSource(currentSrc);
+  }
 }
 
 function changeSeason(s) {
@@ -6338,14 +7637,22 @@ function nextEpisode() {
 }
 
 function closePlayer() {
-  document.getElementById('player-overlay').classList.remove('open');
-  document.getElementById('player-overlay').classList.remove('inactive');
+  stopNextEpTracking();
+  const overlay = document.getElementById('player-overlay');
+  overlay.classList.remove('open', 'inactive', 'fullscreen', 'sports-mode');
   clearTimeout(idleTimer);
   document.getElementById('player-iframe').src = '';
   document.body.style.overflow = '';
-  document.title = "Stream Local — Premium Streaming";
-  
-  if (playerOpenTime) {
+
+  // Hide sports hint
+  const hint = document.getElementById('sports-player-hint');
+  if (hint) hint.classList.remove('visible');
+
+  if (currentMode === 'sports') {
+    currentSportsGame = null;
+    currentSportSrc = 0;
+    playerOpenTime = 0;
+  } else if (playerOpenTime) {
     const elapsedSeconds = (Date.now() - playerOpenTime) / 1000;
     const estTotalSeconds = currentMedia.type === 'movie' ? 7200 : 2700; // 2 hrs vs 45 mins
     const progressAdded = (elapsedSeconds / estTotalSeconds) * 100;
@@ -6359,6 +7666,52 @@ function closePlayer() {
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     else if (document.msExitFullscreen) document.msExitFullscreen();
   }
+}
+
+/* ===== NEXT EPISODE AUTO-DETECTION ===== */
+function startNextEpTracking() {
+  stopNextEpTracking();
+  if (currentMedia.type !== 'tv') return;
+
+  const floatBtn = document.getElementById('next-ep-floating');
+  if (!floatBtn) return;
+  floatBtn.style.display = 'none';
+
+  // Don't track if already on the very last episode
+  if (isLastEpisode()) return;
+
+  const startTime = Date.now();
+
+  nextEpProgressTimer = setInterval(() => {
+    const elapsed = (Date.now() - startTime) / 1000;
+    const progress = (elapsed / TV_ESTIMATED_SECONDS) * 100;
+
+    if (progress >= 85 && !isLastEpisode()) {
+      floatBtn.style.display = 'inline-flex';
+      clearInterval(nextEpProgressTimer);
+      nextEpProgressTimer = null;
+    }
+  }, 5000); // check every 5 seconds — lightweight
+}
+
+function stopNextEpTracking() {
+  if (nextEpProgressTimer) {
+    clearInterval(nextEpProgressTimer);
+    nextEpProgressTimer = null;
+  }
+  const floatBtn = document.getElementById('next-ep-floating');
+  if (floatBtn) floatBtn.style.display = 'none';
+}
+
+function isLastEpisode() {
+  if (currentMedia.type !== 'tv') return true;
+  const sData = allSeasons.find(x => x.season_number === currentSeason);
+  if (!sData) return false; // can't determine — allow showing
+  const isLastEpOfSeason = currentEp >= sData.episode_count;
+  if (!isLastEpOfSeason) return false;
+  // Check if there's a next season
+  const nextSeason = allSeasons.find(x => x.season_number === currentSeason + 1);
+  return !nextSeason;
 }
 
 function toggleFullscreen() {
@@ -6384,89 +7737,148 @@ function toggleFullscreen() {
   }
 }
 
-let lastFullscreenElement = null;
 function handleFullscreenChange() {
-  const current = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+  const overlay = document.getElementById('player-overlay');
+  const fe = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+  
+  if (!fe) {
+    // Exited fullscreen — reset overlay state so controls appear
+    overlay.classList.remove('inactive');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      overlay.classList.add('inactive');
+    }, 3000);
+  }
+}
+
+function toggleOverlayFullscreen() {
   const overlay = document.getElementById('player-overlay');
   
-  // If reverting from the iframe's fullscreen back to the overlay's fullscreen,
-  // exit completely to avoid being "stuck" in the overlay's fullscreen.
-  if (current === overlay && lastFullscreenElement && lastFullscreenElement !== overlay) {
-    setTimeout(() => {
-      const active = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-      if (active === overlay) {
-        if (document.exitFullscreen) {
-          document.exitFullscreen().catch(()=>{});
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        }
-      }
-    }, 100);
+  if (overlay.classList.contains('fullscreen')) {
+    // Exit fullscreen
+    overlay.classList.remove('fullscreen');
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+  } else {
+    overlay.classList.add('fullscreen');
+    resetIdleTimer();
+    
+    // Try Fullscreen API (works on localhost/HTTPS — hides browser chrome)
+    if (overlay.requestFullscreen) {
+      overlay.requestFullscreen().catch(() => {
+        // Failed (likely file://) — show F11 hint
+        showF11Hint();
+      });
+    } else {
+      showF11Hint();
+    }
   }
-  
-  lastFullscreenElement = current;
 }
+
+function showF11Hint() {
+  const hint = document.getElementById('f11-hint');
+  if (!hint) return;
+  hint.classList.add('visible');
+  clearTimeout(window._f11HintTimer);
+  window._f11HintTimer = setTimeout(() => {
+    hint.classList.remove('visible');
+  }, 4000);
+}
+
+// Wake controls on mouse move over the overlay (for fullscreen mode)
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('player-overlay');
+  overlay.addEventListener('mousemove', resetIdleTimer);
+
+  // Double-click the iframe container to toggle overlay fullscreen
+  const container = document.querySelector('.iframe-container');
+  if (container) {
+    container.addEventListener('dblclick', toggleOverlayFullscreen);
+  }
+});
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
 document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 document.addEventListener('msfullscreenchange', handleFullscreenChange);
 
+function corsProxy(url) {
+  return fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
+}
+
+function openDownloadModal() {
+  const modal = document.getElementById('download-modal');
+  const optionsContainer = document.getElementById('download-options');
+  modal.classList.add('open');
+
+  const title = currentMedia.meta.title || currentMedia.meta.name || '';
+  const epLabel = currentMedia.type === 'tv' ? ` S${currentSeason}E${currentEp}` : '';
+  const isTv = currentMedia.type === 'tv';
+
+  // Build links from all sources for this media
+  const links = SOURCES.map((src, i) => {
+    let url;
+    if (isTv) {
+      url = (src.tv || '').replace(/\{id\}/g, currentMedia.id).replace(/\{s\}/g, currentSeason).replace(/\{e\}/g, currentEp);
+    } else {
+      url = (src.movie || '').replace(/\{id\}/g, currentMedia.id);
+    }
+    return { name: src.name, url, index: i };
+  }).filter(l => l.url);
+
+  // Highlight current source
+  const currentName = SOURCES[currentSrc]?.name;
+
+  optionsContainer.innerHTML = `
+    <div style="margin-bottom:16px;">
+      <div style="font-size:16px; font-weight:600;">${title}${epLabel}</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:4px;">Open in new tab to watch or save</div>
+    </div>
+    ${links.map(l => `
+      <div style="background:rgba(255,255,255,0.04); padding:12px 16px; border-radius:8px; display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; border:1px solid ${l.name === currentName ? 'var(--accent)' : 'rgba(255,255,255,0.06)'};">
+        <div>
+          <span style="font-weight:600; font-size:14px;">${l.name}</span>
+          ${l.name === currentName ? '<span style="font-size:11px; color:var(--accent); margin-left:6px;">● Active</span>' : ''}
+        </div>
+        <a class="btn btn-primary" href="${l.url}" target="_blank" rel="noopener" style="padding:8px 16px; font-size:13px; border-radius:6px; text-decoration:none; white-space:nowrap; background:var(--accent); color:#fff;">▶ Open</a>
+      </div>
+    `).join('')}
+    ${isTv ? `
+      <div style="margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.06);">
+        <button class="btn btn-secondary" onclick="downloadSeasonBatch()" style="width:100%; justify-content:center; padding:10px;">
+          📦 Export All Episode URLs for S${currentSeason}
+        </button>
+      </div>
+    ` : ''}
+    <div style="font-size:11px; color:var(--muted); margin-top:16px; text-align:center;">
+      Opens the stream URL in a new tab. Use browser save/download tools to keep the file.
+    </div>
+  `;
+}
+
 function downloadSeasonBatch() {
   if (currentMedia.type !== 'tv') return;
   const sData = allSeasons.find(s => s.season_number === currentSeason);
-  const count = sData ? sData.episode_count : parseInt(prompt("How many episodes to generate?", "24")) || 24;
+  const count = sData ? sData.episode_count : parseInt(prompt("How many episodes?", "24")) || 24;
 
-  let batch = "";
-  for (let i = 1; i <= count; i++) {
-    const url = `https://vidvault.ru/tv/${currentMedia.id}/${currentSeason}/${i}`;
-    batch += url + "\n";
+  // Generate URLs from all sources for all episodes
+  let batch = `=== ${currentMedia.meta.name || 'Show'} - Season ${currentSeason} ===\n`;
+  batch += `Generated ${new Date().toLocaleString()}\n\n`;
+  
+  for (let src of SOURCES) {
+    if (!src.tv) continue;
+    batch += `\n--- ${src.name} ---\n`;
+    for (let i = 1; i <= count; i++) {
+      const url = src.tv.replace(/\{id\}/g, currentMedia.id).replace(/\{s\}/g, currentSeason).replace(/\{e\}/g, i);
+      batch += `E${i}: ${url}\n`;
+    }
   }
 
   const blob = new Blob([batch], { type: 'text/plain' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `${(currentMedia.meta.name || 'Show').replace(/\s+/g, '_')}_S${currentSeason}_VidVault_Batch.txt`;
+  a.download = `${(currentMedia.meta.name || 'Show').replace(/\s+/g, '_')}_S${currentSeason}_Stream_Urls.txt`;
   a.click();
-}
-
-async function corsProxy(url) {
-  const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
-  return await res.json();
-}
-
-async function openDownloadModal() {
-  const modal = document.getElementById('download-modal');
-  const optionsContainer = document.getElementById('download-options');
-  modal.classList.add('open');
-  optionsContainer.innerHTML = '<div class="spinner" style="margin: 0 auto;"></div><div style="font-size:14px; margin-top:10px; color:var(--muted);">Loading download options...</div>';
-
-  try {
-    const title = currentMedia.meta.title || currentMedia.meta.name || '';
-    const type = currentMedia.type;
-    const id = currentMedia.id;
-
-    let vidvaultUrl = '';
-    if (type === 'movie') {
-      vidvaultUrl = `https://vidvault.ru/movie/${id}`;
-    } else if (type === 'tv') {
-      vidvaultUrl = `https://vidvault.ru/tv/${id}/${currentSeason}/${currentEp}`;
-    }
-
-    const epLabel = type === 'tv' ? ` — S${currentSeason} E${currentEp}` : '';
-
-    optionsContainer.innerHTML = '<div style="text-align:left; margin-bottom:16px;"><div style="font-size:16px; font-weight:600;">' + title + epLabel + '</div><div style="font-size:12px; color:var(--muted); margin-top:4px;">Download via VidVault</div></div>' +
-      '<div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:8px; display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid rgba(255,255,255,0.08); margin-bottom:8px;">' +
-      '<div><span style="display:inline-block; background:#2563eb; padding:3px 10px; border-radius:4px; font-size:13px; font-weight:700; color:#fff; margin-right:8px;">VidVault</span><span style="font-size:12px; color:var(--muted);">Direct download link</span></div>' +
-      '<a class="btn btn-primary" href="' + vidvaultUrl + '" target="_blank" style="padding:10px 20px; font-size:14px; border-radius:6px; text-decoration:none; white-space:nowrap;">📥 Open VidVault</a>' +
-      '</div>' +
-      '<div style="font-size:11px; color:var(--muted); margin-top:12px; text-align:center;">VidVault provides direct download links for movies and TV shows</div>';
-
-  } catch (err) {
-    console.error('Download modal error:', err);
-    optionsContainer.innerHTML = '<div style="color:var(--error); padding:20px; text-align:center;">Something went wrong. Please try again.</div>';
-  }
 }
 
 </script>
@@ -6475,9 +7887,16 @@ async function openDownloadModal() {
 <script>
 /* ===== INIT & EVENTS ===== */
 document.addEventListener('DOMContentLoaded', () => {
-  if (TMDB_KEY) document.getElementById('tmdb-key-input').value = TMDB_KEY;
+  // Init sports data
+  loadSportsSources();
+  loadSportsGames();
+
+  // Init movie/TV data
   loadSources();
-  if (TMDB_KEY) loadHome();
+  if (TMDB_KEY) {
+    document.getElementById('tmdb-key-input').value = TMDB_KEY;
+    loadHome();
+  }
   loadHistory();
   loadWatchlist();
   document.getElementById('theme-select').value = savedTheme;
