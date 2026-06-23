@@ -369,6 +369,36 @@ nav.scrolled {
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* Person search results — red accent background */
+.sr-item.person {
+  background: rgba(229, 9, 20, 0.06);
+  border-left: 3px solid var(--accent);
+  border-bottom-color: rgba(229, 9, 20, 0.08);
+}
+
+.sr-item.person:hover {
+  background: rgba(229, 9, 20, 0.1);
+}
+
+.sr-item.person:active {
+  background: rgba(229, 9, 20, 0.13);
+}
+
+.sr-poster-person {
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+
+[data-theme="light"] .sr-item.person {
+  background: rgba(196, 98, 58, 0.04);
+  border-left-color: var(--accent);
+}
+
+[data-theme="light"] .sr-item.person:hover {
+  background: rgba(196, 98, 58, 0.08);
+}
+
 .sr-poster {
   width: 40px;
   height: 60px;
@@ -899,6 +929,80 @@ nav.scrolled {
 }
 
 /* ===== ANNOUNCEMENT POPUPS ===== */
+.surprise-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, rgba(229,9,20,0.12), rgba(229,9,20,0.04));
+  border: 1px solid rgba(229,9,20,0.2);
+  border-radius: 100px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.surprise-btn:hover {
+  background: linear-gradient(135deg, rgba(229,9,20,0.2), rgba(229,9,20,0.08));
+  border-color: rgba(229,9,20,0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(229,9,20,0.08);
+}
+
+.surprise-btn:active {
+  transform: scale(0.97);
+}
+
+[data-theme="light"] .surprise-btn {
+  background: linear-gradient(135deg, rgba(196,98,58,0.08), rgba(196,98,58,0.02));
+  border-color: rgba(196,98,58,0.12);
+}
+
+/* SURPRISE MODAL BUTTONS */
+.surprise-modal-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  font-size: 13px;
+}
+
+.surprise-modal-btn:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+  transform: translateY(-1px);
+}
+
+.surprise-modal-btn:active {
+  transform: scale(0.97);
+}
+
+.surprise-modal-btn.genre {
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+[data-theme="light"] .surprise-modal-btn {
+  border-color: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .surprise-modal-btn:hover {
+  border-color: rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.02);
+}
+
 .announce-overlay {
   position: fixed;
   inset: 0;
@@ -1050,6 +1154,196 @@ nav.scrolled {
 
 [data-theme="light"] .announce-close:hover {
   background: rgba(0, 0, 0, 0.04);
+}
+
+/* ===== EASTER EGG ===== */
+.egg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  animation: eggFadeIn 0.3s ease;
+}
+
+.egg-card {
+  background: linear-gradient(145deg, #1a1a2e, #16213e);
+  border: 2px solid rgba(255,215,0,0.3);
+  border-radius: 28px;
+  padding: 48px 40px 36px;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 0 60px rgba(255,215,0,0.1), 0 24px 80px rgba(0,0,0,0.5);
+  animation: eggBounce 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.egg-card::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(from 0deg, transparent, rgba(255,215,0,0.03), transparent, rgba(255,215,0,0.03), transparent);
+  animation: eggSpin 4s linear infinite;
+}
+
+.egg-sparkles {
+  font-size: 28px;
+  animation: eggSparkle 1.5s ease-in-out infinite;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.egg-title {
+  font-size: 32px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ffd700, #ff6b6b, #ffd700);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: eggShine 2s linear infinite;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.5px;
+}
+
+.egg-sub {
+  font-size: 16px;
+  color: #ff6b6b;
+  font-weight: 700;
+  font-style: italic;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+  animation: eggPulse 1.2s ease-in-out infinite;
+}
+
+.egg-emoji-row {
+  font-size: 24px;
+  animation: eggFloat 2s ease-in-out infinite;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.egg-btn {
+  background: linear-gradient(135deg, #ffd700, #ff6b6b);
+  border: none;
+  padding: 12px 40px;
+  border-radius: 100px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
+  cursor: pointer;
+  transition: transform 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.egg-btn:hover {
+  transform: scale(1.05);
+}
+
+.egg-btn:active {
+  transform: scale(0.95);
+}
+
+@keyframes eggFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes eggBounce {
+  0% { opacity: 0; transform: scale(0.5) translateY(40px); }
+  60% { transform: scale(1.05) translateY(-6px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes eggSparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.1) rotate(5deg); }
+}
+
+@keyframes eggShine {
+  to { background-position: 200% center; }
+}
+
+@keyframes eggPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.03); }
+}
+
+@keyframes eggFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes eggSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== ADMIN PANEL ===== */
+.admin-user-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: background 0.15s;
+  border: 1px solid transparent;
+}
+
+.admin-user-item:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.admin-user-item.active {
+  background: rgba(229,9,20,0.08);
+  border-color: rgba(229,9,20,0.15);
+}
+
+.admin-stat {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-hist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--card);
+  border-radius: 6px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+[data-theme="light"] .admin-user-item:hover {
+  background: rgba(0,0,0,0.02);
+}
+
+[data-theme="light"] .admin-user-item.active {
+  background: rgba(196,98,58,0.06);
+  border-color: rgba(196,98,58,0.12);
+}
+
+[data-theme="light"] .admin-stat,
+[data-theme="light"] .admin-hist-item {
+  border-color: rgba(0,0,0,0.04);
 }
 
 /* ===== PROFILE AVATAR & DROPDOWN ===== */
@@ -4745,6 +5039,11 @@ nav.scrolled {
   .nav-search:focus-within .search-results {
     top: 110px !important;
   }
+
+  /* Hide search recents on mobile */
+  .show-recents {
+    display: none !important;
+  }
   .view {
     padding-top: 120px !important;
   }
@@ -6034,6 +6333,10 @@ nav.scrolled {
       </div>
     </div>
 
+    <div class="row" style="padding-top:12px; padding-bottom:4px;">
+      <button class="surprise-btn" onclick="openSurpriseModal()">🎲 Random</button>
+    </div>
+
     <div id="continue-section" style="display:none;">
       <div class="row">
         <h2 class="row-title" style="display:flex; align-items:center; gap:10px;">
@@ -6044,8 +6347,6 @@ nav.scrolled {
         <div class="carousel" id="continue-carousel"></div>
       </div>
     </div>
-
-
 
     <div class="row">
       <div class="row-header">
@@ -6621,6 +6922,44 @@ function selectAvatar(index) {
  * 4. Go to SQL Editor and run the SQL from the Supabase Setup Guide
  *    (included at the end of this section as a comment)
  * ============================================================ */
+
+/* ===== EASTER EGG ===== */
+document.addEventListener('DOMContentLoaded', () => {
+  const usernameInput = document.getElementById('auth-username');
+  if (usernameInput) {
+    let eggFired = false;
+    usernameInput.addEventListener('blur', () => {
+      if (eggFired) return;
+      const val = usernameInput.value.trim().toLowerCase();
+      if (val === 'jenjew') {
+        eggFired = true;
+        triggerEasterEgg();
+      }
+    });
+  }
+});
+
+function triggerEasterEgg() {
+  // Remove existing egg if any
+  document.getElementById('egg-modal')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'egg-modal';
+  overlay.className = 'egg-overlay';
+  overlay.onclick = function() { this.remove(); };
+
+  overlay.innerHTML = `
+    <div class="egg-card">
+      <div class="egg-sparkles">✨🎉✨🎉✨</div>
+      <div class="egg-title">HI JENNIFER JEWITT</div>
+      <div class="egg-sub">LOL I PREPROGRAMMED IT LOL</div>
+      <div class="egg-emoji-row">🎭🌟💖🎬🌟💖</div>
+      <button class="egg-btn" onclick="this.closest('.egg-overlay').remove()">😂 Close</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+}
 const SUPABASE_URL = 'https://lvgnziipghjjbitnrgmp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z256aWlwZ2hqamJpdG5yZ21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjgwOTIsImV4cCI6MjA5Nzc0NDA5Mn0.IqxKiDEat4Zekm4m2flHmNnTcCKKOsybA2O1oJcLAEA';
 let supabaseClient = null;
@@ -6716,6 +7055,14 @@ async function authLogin() {
   if (!username || !password) return showAuthError('Enter your username and password.');
   if (!supabaseClient) return showAuthError('Supabase not configured — set your URL + anon key in core.js');
 
+  // Admin easter egg login
+  if (username === 'admin' && password === 'admin') {
+    document.getElementById('auth-username').value = '';
+    document.getElementById('auth-password').value = '';
+    openAdminPanel();
+    return;
+  }
+
   const email = username + '@streamlocal.user';
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) return showAuthError(error.message);
@@ -6755,7 +7102,8 @@ function getAppData() {
     sports_sources: (() => { try { return JSON.parse(localStorage.getItem('streamlocal_sports_sources')) || []; } catch(e) { return []; } })(),
     theme: localStorage.getItem('aether_v2_theme') || 'dark',
     style: localStorage.getItem('aether_v2_style') || 'new',
-    avatar: localStorage.getItem('sl_avatar') || ''
+    avatar: localStorage.getItem('sl_avatar') || '',
+    searches: (() => { try { return JSON.parse(localStorage.getItem('sl_search_recents')) || []; } catch(e) { return []; } })()
   };
 }
 
@@ -6803,6 +7151,9 @@ async function loadFromServer() {
   if (d.avatar) {
     localStorage.setItem('sl_avatar', d.avatar);
   }
+  if (d.searches?.length) {
+    localStorage.setItem('sl_search_recents', JSON.stringify(d.searches));
+  }
   updateProfileButton();
 }
 
@@ -6814,6 +7165,162 @@ function setSyncStatus(msg) {
 async function forceSyncToServer() {
   setSyncStatus('⏳ Syncing...');
   await syncToServer();
+}
+
+/* ===== ADMIN PANEL ===== */
+function getAdminKey() {
+  let key = localStorage.getItem('sl_admin_key');
+  if (!key) {
+    key = prompt('Enter Supabase service_role key for admin access:');
+    if (key && key.length > 20) {
+      localStorage.setItem('sl_admin_key', key);
+    }
+  }
+  return key;
+}
+
+async function openAdminPanel() {
+  const existing = document.getElementById('admin-panel');
+  if (existing) { existing.remove(); return; }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'admin-panel';
+  overlay.className = 'modal-overlay';
+  overlay.style.cssText = 'z-index:7000; display:flex;';
+  overlay.onclick = function(e) { if (e.target === this) this.remove(); };
+
+  overlay.innerHTML = `
+    <div class="modal-content" style="max-width:800px; padding:0; overflow:hidden; max-height:85vh; display:flex; flex-direction:column;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid rgba(255,255,255,0.06);">
+        <div>
+          <h2 style="margin:0; font-size:20px;">🛡️ Admin Panel</h2>
+          <p style="margin:2px 0 0; font-size:13px; color:var(--muted);">All registered users and their data</p>
+        </div>
+        <button class="modal-close" style="position:static;" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+      </div>
+      <div style="display:flex; flex:1; overflow:hidden;">
+        <div id="admin-user-list" style="width:240px; flex-shrink:0; border-right:1px solid rgba(255,255,255,0.06); overflow-y:auto; padding:12px;">
+          <div style="text-align:center; padding:30px; color:var(--muted); font-size:13px;">Loading users...</div>
+        </div>
+        <div id="admin-user-detail" style="flex:1; overflow-y:auto; padding:20px 24px;">
+          <div style="text-align:center; padding:60px 20px; color:var(--muted);">
+            <div style="font-size:40px; margin-bottom:12px;">👥</div>
+            <div style="font-size:14px;">Select a user to view their data</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  loadAdminUsers();
+}
+
+async function loadAdminUsers() {
+  const list = document.getElementById('admin-user-list');
+  const key = getAdminKey();
+  if (!key || key.length < 20) {
+    list.innerHTML = '<div style="padding:20px; color:var(--accent); font-size:13px;">Need valid service_role key</div>';
+    return;
+  }
+
+  try {
+    // Fetch app data and auth users in parallel
+    const [dataResp, authResp] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/user_data?select=*`, {
+        headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
+      }),
+      fetch(`${SUPABASE_URL}/rest/v1/user_emails?select=id,email`, {
+        headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
+      })
+    ]);
+
+    if (!dataResp.ok) throw new Error('Failed: ' + dataResp.status);
+    const users = await dataResp.json();
+    const authUsers = authResp.ok ? await authResp.json() : [];
+
+    // Build a map of user_id -> email
+    const emailMap = {};
+    (authUsers || []).forEach(au => {
+      emailMap[au.id] = au.email;
+    });
+
+    if (!users.length) {
+      list.innerHTML = '<div style="padding:20px; color:var(--muted); font-size:13px;">No users yet.</div>';
+      return;
+    }
+
+    list.innerHTML = users.map((u, i) => {
+      const appData = u.app_data || {};
+      const email = emailMap[u.user_id] || '';
+      const displayName = email ? email.replace('@streamlocal.user', '') : u.user_id?.slice(0,12);
+      const avIdx = parseInt(appData.avatar) || -1;
+      const emoji = (avIdx >= 0 && AVATARS[avIdx]) ? AVATARS[avIdx].emoji : '👤';
+      const watchCount = appData.watchlist?.length || 0;
+      const histCount = appData.history?.length || 0;
+      return `<div class="admin-user-item ${i === 0 ? 'active' : ''}" onclick="showAdminUserDetail('${u.user_id}', this)" data-user='${JSON.stringify({user_id: u.user_id, email: email, app_data: appData}).replace(/'/g, "&#39;")}'>
+        <div style="font-weight:600; font-size:13px; overflow:hidden; text-overflow:ellipsis;">${emoji} ${displayName}</div>
+        <div style="font-size:11px; color:var(--muted);">${watchCount} watchlist · ${histCount} history</div>
+      </div>`;
+    }).join('');
+
+    const first = list.querySelector('.admin-user-item');
+    if (first) first.click();
+  } catch(e) {
+    list.innerHTML = `<div style="padding:20px; color:var(--accent); font-size:13px;">Error: ${e.message}</div>`;
+  }
+}
+
+function showAdminUserDetail(userId, el) {
+  document.querySelectorAll('.admin-user-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  try {
+    const user = JSON.parse(el?.dataset?.user || '{}');
+    const d = user.app_data || {};
+    const detail = document.getElementById('admin-user-detail');
+    if (!detail) return;
+
+    const email = user.email || '';
+    const displayName = email ? email.replace('@streamlocal.user', '') : userId?.slice(0,12);
+
+    const avIdx = parseInt(d.avatar) || -1;
+    const avatarEmoji = (avIdx >= 0 && AVATARS[avIdx]) ? AVATARS[avIdx].emoji : '👤';
+    const avatarBg = (avIdx >= 0 && AVATARS[avIdx]) ? AVATARS[avIdx].bg : '#333';
+
+    const watchlist = d.watchlist || [];
+    const history = d.history || [];
+    const theme = d.theme || 'dark';
+
+    detail.innerHTML = `
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px;">
+        <div style="width:52px; height:52px; border-radius:50%; background:${avatarBg}; display:flex; align-items:center; justify-content:center; font-size:26px;">${avatarEmoji}</div>
+        <div>
+          <div style="font-weight:700; font-size:18px;">${displayName}</div>
+          <div style="font-size:13px; color:var(--muted);">Theme: ${theme}</div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+        <div class="admin-stat"><span>🎬</span> ${watchlist.length} Watchlist</div>
+        <div class="admin-stat"><span>📜</span> ${history.length} History</div>
+      </div>
+      ${history.length > 0 ? '<div style="margin-bottom:16px;"><div style="font-size:13px; font-weight:600; color:var(--muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.06em;">Recently Watched</div>' +
+        history.slice(0, 5).map(h => `
+          <div class="admin-hist-item">
+            <span>${h.meta?.title || 'Unknown'}</span>
+            <span style="color:var(--muted); font-size:12px;">${h.type === 'tv' ? 'S' + h.s + ' E' + h.e : 'Movie'} · ${Math.round(h.progress || 0)}%</span>
+          </div>
+        `).join('') + '</div>' : ''}
+      ${watchlist.length > 0 ? '<div><div style="font-size:13px; font-weight:600; color:var(--muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.06em;">Watchlist</div><div style="display:flex; flex-wrap:wrap; gap:6px;">' +
+        watchlist.slice(0, 8).map(w => '<span style="background:var(--card); padding:4px 10px; border-radius:6px; font-size:12px; border:1px solid rgba(255,255,255,0.04);">' + (w.title || '?') + '</span>').join('') +
+        (watchlist.length > 8 ? '<span style="font-size:12px; color:var(--muted);">+' + (watchlist.length - 8) + ' more</span>' : '') + '</div></div>' : ''}
+      ${d.searches?.length > 0 ? '<div style="margin-top:16px;"><div style="font-size:13px; font-weight:600; color:var(--muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.06em;">Recent Searches</div><div style="display:flex; flex-wrap:wrap; gap:6px;">' +
+        d.searches.slice(0, 10).map(s => '<span style="background:var(--card); padding:4px 10px; border-radius:6px; font-size:12px; border:1px solid rgba(255,255,255,0.04);">🔍 ' + s + '</span>').join('') +
+        (d.searches.length > 10 ? '<span style="font-size:12px; color:var(--muted);">+' + (d.searches.length - 10) + ' more</span>' : '') + '</div></div>' : ''}
+    `;
+  } catch(e) {
+    console.log('Admin detail error:', e);
+  }
 }
 
 /* ============================================================
@@ -7425,21 +7932,24 @@ function loadSportsEmbed() {
   if (!url) { switchSportsSource(1); return; }
 
   const iframe = document.getElementById('player-iframe');
-  document.getElementById('embed-loading').style.display = 'flex';
-  document.getElementById('embed-status').textContent = `Connecting to ${src.name}...`;
+  const loading = document.getElementById('embed-loading');
+  const status = document.getElementById('embed-status');
+  loading.style.display = 'flex';
+  status.innerHTML = `<span style="opacity:0.5;">Source ${currentSportSrc+1}/${fallbacks.length}</span> &nbsp; Connecting to <strong>${src.name}</strong>...`;
   iframe.src = url;
 
   clearTimeout(failoverTimer);
   iframe.onload = () => {
-    document.getElementById('embed-loading').style.display = 'none';
+    loading.style.display = 'none';
   };
 
   if (getAutoSkip()) {
     const timeout = getSkipTimeout();
     if (timeout > 0) {
       failoverTimer = setTimeout(() => {
-        if (document.getElementById('embed-loading').style.display !== 'none') {
-          switchSportsSource(1);
+        if (loading.style.display !== 'none') {
+          status.innerHTML = `<span style="color:var(--accent);">⚠️ ${src.name} didn't load</span> &nbsp; Trying next...`;
+          setTimeout(() => switchSportsSource(1), 1200);
         }
       }, timeout);
     }
@@ -7558,7 +8068,7 @@ searchInput.addEventListener('keydown', function (e) {
       if (filterGenre) filterGenre.value = '';
       if (filterSort) filterSort.value = 'popularity.desc';
       if (filterYear) filterYear.value = '';
-      if (q) doFullSearch(q);
+      if (q) { saveSearchRecents(q); doFullSearch(q); }
       else { switchView('search'); document.getElementById('full-search-title').textContent = 'Discover'; applySearchFilters(1); }
     }
   }
@@ -7602,6 +8112,11 @@ searchResultsEl.addEventListener('click', function (e) {
     searchInput.blur();
     isSearchResultInteraction = false;
     showDetails(parseInt(item.dataset.id), item.dataset.type);
+  } else if (item.dataset.person) {
+    searchResultsEl.classList.remove('open');
+    searchInput.blur();
+    isSearchResultInteraction = false;
+    showActorDetails(parseInt(item.dataset.person));
   }
 });
 
@@ -7609,6 +8124,71 @@ searchResultsEl.addEventListener('click', function (e) {
 document.addEventListener('click', function (e) {
   if (!e.target.closest('.nav-search')) {
     searchResultsEl.classList.remove('open');
+  }
+});
+
+/* ===== SEARCH RECENTS ===== */
+function getSearchRecents() {
+  try { return JSON.parse(localStorage.getItem('sl_search_recents')) || []; } catch(e) { return []; }
+}
+
+function saveSearchRecents(q) {
+  let recents = getSearchRecents().filter(r => r !== q);
+  recents.unshift(q);
+  if (recents.length > 20) recents = recents.slice(0, 20);
+  localStorage.setItem('sl_search_recents', JSON.stringify(recents));
+  syncToServer();
+}
+
+function showSearchRecents() {
+  const recents = getSearchRecents();
+  const el = searchResultsEl;
+  if (recents.length === 0) return;
+
+  el.innerHTML = `
+    <div class="sr-section-header" style="display:flex; justify-content:space-between; padding:8px 12px 4px;">
+      <span style="font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">Recent</span>
+      <span onclick="event.stopPropagation(); clearSearchRecents()" style="font-size:11px; color:var(--accent); cursor:pointer;">Clear</span>
+    </div>
+    ${recents.map(q => `
+      <div class="sr-item sr-recent" onclick="searchRecent('${q.replace(/'/g, "\\'")}')">
+        <span style="font-size:14px; opacity:0.4; margin-right:8px;">🕐</span>
+        <div class="sr-info">
+          <div class="sr-title">${q}</div>
+        </div>
+      </div>
+    `).join('')}
+  `;
+  el.classList.add('open', 'show-recents');
+}
+
+function clearSearchRecents() {
+  localStorage.removeItem('sl_search_recents');
+  searchResultsEl.classList.remove('open', 'show-recents');
+}
+
+function searchRecent(q) {
+  searchInput.value = q;
+  searchResultsEl.classList.remove('open');
+  searchInput.blur();
+  // Trigger full search
+  doFullSearch(q);
+}
+
+// Show recents on focus when empty (desktop only)
+searchInput.addEventListener('focus', function() {
+  const q = this.value.trim();
+  if (!q && window.innerWidth >= 1024 && !('ontouchstart' in window)) {
+    showSearchRecents();
+  } else if (q && q.length >= 2) {
+    searchResultsEl.classList.add('open');
+  }
+});
+
+// Refresh recents when input goes empty
+searchInput.addEventListener('input', function() {
+  if (!this.value.trim() && window.innerWidth >= 1024 && !('ontouchstart' in window)) {
+    showSearchRecents();
   }
 });
 
@@ -7753,13 +8333,24 @@ async function doSearch(q) {
   const r = document.getElementById('search-results');
   if (!data || !data.results.length) { r.innerHTML = '<div class="sr-item" style="color:var(--muted);">No results</div>'; return r.classList.add('open'); }
 
-  r.innerHTML = data.results.filter(x => x.media_type === 'movie' || x.media_type === 'tv').slice(0, 10).map(item => {
+  r.innerHTML = data.results.slice(0, 10).map(item => {
     if (item.backdrop_path) queuePreload(item.backdrop_path);
+    if (item.media_type === 'person') {
+      const profile = item.profile_path ? `${IMG}${item.profile_path}` : '';
+      return `<div class="sr-item person" data-person="${item.id}">
+        ${profile ? `<img class="sr-poster sr-poster-person" src="${profile}" draggable="false" />` : `<div class="sr-poster sr-poster-person" style="background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:18px;">👤</div>`}
+        <div class="sr-info">
+          <div class="sr-title">${item.name}</div>
+          <div class="sr-meta">${item.known_for_department || 'Actor'} • PERSON</div>
+        </div>
+        <span style="font-size:11px; color:var(--accent); font-weight:600;">View →</span>
+      </div>`;
+    }
     return `<div class="sr-item" data-id="${item.id}" data-type="${item.media_type}">
       ${item.poster_path ? `<img class="sr-poster" src="${IMG}${item.poster_path}" draggable="false" />` : `<div class="sr-poster"></div>`}
       <div class="sr-info">
         <div class="sr-title">${item.title || item.name}</div>
-        <div class="sr-meta">${(item.release_date || item.first_air_date || '').slice(0, 4)} • ${item.media_type.toUpperCase()}</div>
+        <div class="sr-meta">${(item.release_date || item.first_air_date || '').slice(0, 4)} • ${item.media_type?.toUpperCase() || ''}</div>
       </div>
     </div>`;
   }).join('');
@@ -7875,6 +8466,109 @@ function doSportsFullSearch(q) {
   
 <script>
 /* ===== HOME UI & CAROUSELS ===== */
+function openSurpriseModal() {
+  if (!TMDB_KEY) return alert('Add an API key in Settings first.');
+
+  // Remove existing modal if open
+  document.getElementById('surprise-modal')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'surprise-modal';
+  overlay.className = 'modal-overlay';
+  overlay.style.cssText = 'z-index:6000; display:flex;';
+  overlay.onclick = function(e) { if (e.target === this) this.remove(); };
+
+  const genres = [
+    { id: '28', name: 'Action', emoji: '💥' },
+    { id: '35', name: 'Comedy', emoji: '😂' },
+    { id: '18', name: 'Drama', emoji: '🎭' },
+    { id: '878', name: 'Sci-Fi', emoji: '🚀' },
+    { id: '27', name: 'Horror', emoji: '👻' },
+    { id: '10749', name: 'Romance', emoji: '💕' },
+    { id: '16', name: 'Animation', emoji: '🎨' },
+    { id: '53', name: 'Thriller', emoji: '🔪' },
+    { id: '12', name: 'Adventure', emoji: '🏔️' },
+  ];
+
+  overlay.innerHTML = `
+    <div class="modal-content" style="max-width:600px; padding:32px;">
+      <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+      <h2 style="margin-bottom:4px;">🎲 Pick Something</h2>
+      <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">Random trending movie or TV show — or pick a genre.</p>
+
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <button class="surprise-modal-btn" onclick="pickRandomTrending('movie')" style="flex:1;">
+          <span style="font-size:24px;">🎬</span>
+          <div>
+            <div style="font-weight:600;">Random Movie</div>
+            <div style="font-size:11px; color:var(--muted);">Any genre</div>
+          </div>
+        </button>
+        <button class="surprise-modal-btn" onclick="pickRandomTrending('tv')" style="flex:1;">
+          <span style="font-size:24px;">📺</span>
+          <div>
+            <div style="font-weight:600;">Random TV Show</div>
+            <div style="font-size:11px; color:var(--muted);">Any genre</div>
+          </div>
+        </button>
+      </div>
+
+      <div style="border-top:1px solid rgba(255,255,255,0.06); padding-top:16px;">
+        <div style="font-size:13px; font-weight:600; color:var(--muted); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.06em;">Pick a Genre</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:8px;">
+          ${genres.map(g => `
+            <button class="surprise-modal-btn genre" onclick="pickRandomGenre('${g.id}', '${g.name}')">
+              <span>${g.emoji}</span>
+              <span>${g.name}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  // Close on overlay click
+  overlay.addEventListener('click', function(e) { if (e.target === this) this.remove(); });
+}
+
+async function pickRandomTrending(type) {
+  document.getElementById('surprise-modal')?.remove();
+  const btn = document.querySelector('.surprise-btn');
+  if (btn) { btn.textContent = '🎲 Rolling...'; btn.style.pointerEvents = 'none'; }
+
+  try {
+    const endpoint = type === 'tv' ? '/trending/tv/week' : '/trending/movie/week';
+    const page = Math.floor(Math.random() * 5) + 1;
+    const data = await tmdb(endpoint, { page });
+    if (!data?.results?.length) throw new Error('No results');
+    const pick = data.results[Math.floor(Math.random() * data.results.length)];
+    showDetails(pick.id, type);
+  } catch(e) {
+    alert('Nothing found. Try again!');
+  }
+
+  if (btn) { btn.textContent = '🎲 Random'; btn.style.pointerEvents = ''; }
+}
+
+async function pickRandomGenre(genreId, genreName) {
+  document.getElementById('surprise-modal')?.remove();
+  const btn = document.querySelector('.surprise-btn');
+  if (btn) { btn.textContent = `🎲 ${genreName}...`; btn.style.pointerEvents = 'none'; }
+
+  try {
+    const page = Math.floor(Math.random() * 5) + 1;
+    const data = await tmdb('/discover/movie', { with_genres: genreId, page, sort_by: 'popularity.desc' });
+    if (!data?.results?.length) throw new Error('No results');
+    const pick = data.results[Math.floor(Math.random() * data.results.length)];
+    showDetails(pick.id, 'movie');
+  } catch(e) {
+    alert(`No ${genreName} movies found. Try again!`);
+  }
+
+  if (btn) { btn.textContent = '🎲 Random'; btn.style.pointerEvents = ''; }
+}
+
 async function loadHome() {
   if (!TMDB_KEY) return;
   const trend = await tmdb('/trending/all/week');
@@ -8591,20 +9285,23 @@ function loadEmbed() {
   if (!url) { skipSource(); return; } // if template is empty
 
   const iframe = document.getElementById('player-iframe');
-  document.getElementById('embed-loading').style.display = 'flex';
-  document.getElementById('embed-status').textContent = `Connecting to ${src.name}...`;
+  const loading = document.getElementById('embed-loading');
+  const status = document.getElementById('embed-status');
+  loading.style.display = 'flex';
+  status.innerHTML = `<span style="opacity:0.5;">Source ${currentSrc+1}/${SOURCES.length}</span> &nbsp; Connecting to <strong>${src.name}</strong>...`;
   iframe.src = url;
 
   clearTimeout(failoverTimer);
   iframe.onload = () => {
-    document.getElementById('embed-loading').style.display = 'none';
+    loading.style.display = 'none';
   };
 
   const skipTimeout = getSkipTimeout();
   if (skipTimeout > 0 && getAutoSkip()) {
     failoverTimer = setTimeout(() => {
-      if (document.getElementById('embed-loading').style.display !== 'none') {
-        skipSource();
+      if (loading.style.display !== 'none') {
+        status.innerHTML = `<span style="color:var(--accent);">⚠️ ${src.name} didn't load</span> &nbsp; Trying next source...`;
+        setTimeout(skipSource, 1200);
       }
     }, skipTimeout);
   }
