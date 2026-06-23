@@ -897,6 +897,384 @@ nav.scrolled {
   background: #e8e3db;
   color: var(--muted);
 }
+
+/* ===== ANNOUNCEMENT POPUPS ===== */
+.announce-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.announce-overlay.open {
+  display: flex;
+}
+
+.announce-card {
+  background: var(--card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  max-width: 420px;
+  width: 100%;
+  padding: 40px 36px 32px;
+  position: relative;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: announceIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes announceIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.announce-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 22px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+}
+
+.announce-close:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.announce-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.announce-icon.sports {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
+  border: 1px solid rgba(34, 197, 94, 0.15);
+}
+
+.announce-icon.shield {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.05));
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.announce-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.announce-desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 24px;
+}
+
+.announce-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.announce-actions .btn {
+  flex: 1;
+  justify-content: center;
+  padding: 12px 20px;
+  font-size: 14px;
+  border-radius: 12px;
+}
+
+.announce-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
+  flex: 1;
+  justify-content: center;
+}
+
+.announce-link-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.announce-link-btn:active {
+  transform: scale(0.97);
+}
+
+/* Light theme overrides */
+[data-theme="light"] .announce-overlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .announce-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .announce-close:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ===== PROFILE AVATAR & DROPDOWN ===== */
+.nav-profile {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.profile-trigger {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-trigger:hover {
+  box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(229,9,20,0.08);
+  transform: scale(1.05);
+}
+
+.profile-trigger:active {
+  transform: scale(0.95);
+}
+
+.profile-trigger.has-avatar {
+  background: transparent;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
+}
+
+.profile-trigger.has-avatar:hover {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+#profile-avatar {
+  line-height: 1;
+  font-size: 18px;
+}
+
+/* Signed-out badge dot */
+.profile-trigger::after {
+  content: '';
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid var(--bg);
+  display: none;
+}
+
+.profile-trigger.signed-in::after {
+  display: block;
+}
+
+/* DROPDOWN */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 260px;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2);
+  z-index: 500;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.profile-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.pd-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 18px 14px;
+}
+
+.pd-avatar-large {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.pd-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.04);
+  margin: 0 18px;
+}
+
+.pd-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 18px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.pd-item:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+.pd-item span:first-child {
+  font-size: 16px;
+  width: 22px;
+  text-align: center;
+}
+
+.pd-signout {
+  color: #ef4444;
+}
+
+.pd-signout:hover {
+  background: rgba(239,68,68,0.06);
+}
+
+/* AVATAR PICKER GRID */
+.avatar-option {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  transition: all 0.15s;
+  background: var(--card);
+}
+
+.avatar-option:hover {
+  transform: scale(1.12);
+  border-color: var(--muted);
+}
+
+.avatar-option.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(229,9,20,0.15);
+  transform: scale(1.08);
+}
+
+/* Light theme overrides */
+[data-theme="light"] .profile-trigger {
+  background: rgba(0,0,0,0.04);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .profile-trigger::after {
+  border-color: var(--bg);
+}
+
+[data-theme="light"] .profile-dropdown {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .pd-divider {
+  background: rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] .pd-item:hover {
+  background: rgba(0,0,0,0.03);
+}
+
+[data-theme="light"] .avatar-option {
+  background: rgba(0,0,0,0.02);
+  border-color: rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] .avatar-option:hover {
+  border-color: rgba(0,0,0,0.15);
+}
+
+/* Responsive: hide profile dropdown text on small screens, keep icon */
+@media (max-width: 800px) {
+  .nav-profile {
+    margin-left: 6px;
+  }
+  .profile-trigger {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+  }
+  #profile-avatar {
+    font-size: 15px;
+  }
+  .profile-dropdown {
+    right: -4px;
+    width: 220px;
+  }
+}
 </style>
 
   
@@ -4249,6 +4627,7 @@ nav.scrolled {
   .nav-search {
     width: auto;
     flex: 1;
+    min-width: 0;
     max-width: none;
     position: static;
     transition: none;
@@ -4258,6 +4637,36 @@ nav.scrolled {
   }
   .nav-search .s-icon {
     display: none;
+  }
+
+  /* Profile button compact on mobile */
+  .nav-profile {
+    margin-left: 6px;
+    flex-shrink: 0;
+  }
+  .profile-trigger {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+  #profile-avatar {
+    font-size: 14px;
+  }
+  .profile-trigger::after {
+    width: 7px;
+    height: 7px;
+    bottom: 0;
+    right: 0;
+  }
+  .profile-dropdown {
+    right: -6px;
+    width: 220px;
+  }
+
+  /* Keep profile accessible when search overlay is active */
+  .nav-profile {
+    position: relative;
+    z-index: 300;
   }
 
   /* Slide-down animation for search overlay */
@@ -5551,6 +5960,16 @@ nav.scrolled {
     </div>
   </div>
 
+  <!-- AVATAR PICKER MODAL -->
+  <div id="avatar-picker-modal" class="modal-overlay" onclick="if(event.target === this) closeAvatarPicker()" style="z-index: 4000;">
+    <div class="modal-content" style="max-width: 600px; padding: 32px;">
+      <button class="modal-close" onclick="closeAvatarPicker()">&times;</button>
+      <h2 style="margin-bottom: 4px;">Choose Your Avatar</h2>
+      <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">Pick one that feels like you.</p>
+      <div id="avatar-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(52px, 1fr)); gap:8px; max-height:400px; overflow-y:auto; padding:4px;"></div>
+    </div>
+  </div>
+
   <!-- NAV -->
   <nav id="navbar">
     <div class="logo" onclick="switchView('home')">Stream Local</div>
@@ -5565,7 +5984,43 @@ nav.scrolled {
       <input id="search-input" type="text" placeholder="Titles, people, genres" autocomplete="off" />
       <div class="search-results" id="search-results"></div>
     </div>
+    <div class="nav-profile">
+      <button id="profile-btn" class="profile-trigger" onclick="toggleProfileDropdown()" title="Account">
+        <span id="profile-avatar">👤</span>
+      </button>
+      <div id="profile-dropdown" class="profile-dropdown">
+        <div class="pd-header" id="pd-header">
+          <span id="pd-avatar" class="pd-avatar-large">👤</span>
+          <div>
+            <div id="pd-name" style="font-weight:600; font-size:14px;">Guest</div>
+            <div id="pd-email" style="font-size:12px; color:var(--muted);">Not signed in</div>
+          </div>
+        </div>
+        <div class="pd-divider"></div>
+        <button class="pd-item" id="pd-signin-btn" onclick="closeProfileDropdown(); switchView('settings')">
+          <span>🔑</span> Sign In / Sign Up
+        </button>
+        <button class="pd-item" id="pd-settings-btn" onclick="closeProfileDropdown(); switchView('settings')" style="display:none;">
+          <span>⚙️</span> Settings
+        </button>
+        <button class="pd-item" id="pd-avatar-btn" onclick="closeProfileDropdown(); openAvatarPicker()" style="display:none;">
+          <span>🎨</span> Change Avatar
+        </button>
+        <div class="pd-divider" id="pd-divider2" style="display:none;"></div>
+        <button class="pd-item pd-signout" id="pd-signout-btn" onclick="closeProfileDropdown(); authLogout()" style="display:none;">
+          <span>🚪</span> Sign Out
+        </button>
+      </div>
+    </div>
   </nav>
+
+  <!-- ANNOUNCEMENT POPUP -->
+  <div id="announcement-overlay" class="announce-overlay">
+    <div class="announce-card" id="announce-card">
+      <button class="announce-close" onclick="dismissAnnouncement()">&times;</button>
+      <div id="announce-content"></div>
+    </div>
+  </div>
 
   <!-- HOME VIEW -->
   <div id="view-home" class="view active" style="padding-top: 0;">
@@ -5770,6 +6225,31 @@ nav.scrolled {
       </div>
 
       <div class="settings-card">
+        <h3>Playback</h3>
+        <p>Customize how streams behave when you start watching.</p>
+        <div style="margin-top:16px; display:flex; flex-direction:column; gap:14px;">
+          <label style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+            <span style="font-size:14px;">Remember last used source</span>
+            <input type="checkbox" id="setting-remember-source" onchange="setRememberSource(this.checked)" style="width:18px;height:18px;accent-color:var(--accent);" checked />
+          </label>
+          <label style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+            <span style="font-size:14px;">Auto-skip unresponsive sources</span>
+            <input type="checkbox" id="setting-auto-skip" onchange="setAutoSkip(this.checked)" style="width:18px;height:18px;accent-color:var(--accent);" checked />
+          </label>
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-size:14px;">Source skip timeout</span>
+            <select id="setting-skip-timeout" class="input-base" style="width:auto; padding:4px 10px; font-size:13px;" onchange="setSkipTimeout(parseInt(this.value))">
+              <option value="5000">5s</option>
+              <option value="8000" selected>8s</option>
+              <option value="12000">12s</option>
+              <option value="20000">20s</option>
+              <option value="0">Off</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
           <div>
             <h3 style="margin: 0;">Streaming Sources</h3>
@@ -5950,9 +6430,13 @@ const IMG_BG = 'https://image.tmdb.org/t/p/original';
 
 const DEFAULT_SOURCES = [
   { name: 'VidEasy', movie: 'https://player.videasy.net/movie/{id}?autoplay=1', tv: 'https://player.videasy.net/tv/{id}/{s}/{e}?autoplay=1' },
-  { name: 'VidSrc CC', movie: 'https://vidsrc.cc/v2/embed/movie/{id}?autoPlay=true', tv: 'https://vidsrc.cc/v2/embed/tv/{id}/{s}/{e}?autoPlay=true' },
   { name: '111Movies', movie: 'https://111movies.net/movie/{id}?autoplay=1', tv: 'https://111movies.net/tv/{id}/{s}/{e}?autoplay=1' },
-  { name: 'ezvidapi', movie: 'https://ezvidapi.com/embed/movie/{id}?ref=streamlocal.app', tv: 'https://ezvidapi.com/embed/tv/{id}/{s}/{e}?ref=streamlocal.app' },
+  { name: 'VidCore', movie: 'https://www.vidcore.org/embed/movie/{id}', tv: 'https://www.vidcore.org/embed/tv/{id}/{s}/{e}' },
+  { name: 'AutoEmbed', movie: 'https://autoembed.co/movie/tmdb/{id}', tv: 'https://autoembed.co/tv/tmdb/{id}-{s}-{e}' },
+  { name: '2Embed.cc', movie: 'https://www.2embed.cc/embed/{id}', tv: 'https://www.2embed.cc/embedtv/{id}&s={s}&e={e}' },
+  { name: '2Embed.Skin', movie: 'https://www.2embed.skin/embed/{id}', tv: 'https://www.2embed.skin/embedtv/{id}&s={s}&e={e}' },
+  { name: 'MultiEmbed', movie: 'https://multiembed.mov/?video_id={id}&tmdb=1', tv: 'https://multiembed.mov/?video_id={id}&tmdb=1&s={s}&e={e}' },
+  { name: 'VidSrc WTF', movie: 'https://www.vidsrc.wtf/api/3/movie/?id={id}', tv: 'https://vidsrc.wtf/api/3/tv/?id={id}&s={s}&e={e}' },
 ];
 
 const DEFAULT_SPORTS_SOURCES = [
@@ -5974,6 +6458,161 @@ let idleTimer = null;
 let currentMode = 'home'; // 'home' | 'sports'
 let currentSportsGame = null;
 let currentSportSrc = 0;
+
+/* ===== PROFILE AVATARS ===== */
+const AVATARS = [
+  { emoji: '🦊', bg: '#e86f3e' }, { emoji: '🐱', bg: '#f4a261' }, { emoji: '🐶', bg: '#8ecae6' },
+  { emoji: '🐼', bg: '#2a9d8f' }, { emoji: '🦁', bg: '#e9c46a' }, { emoji: '🐸', bg: '#52b788' },
+  { emoji: '🐧', bg: '#457b9d' }, { emoji: '🦉', bg: '#7b2cbf' }, { emoji: '🐰', bg: '#f8a5c2' },
+  { emoji: '🦄', bg: '#c77dff' }, { emoji: '🐲', bg: '#e63946' }, { emoji: '🦋', bg: '#48cae4' },
+  { emoji: '🐙', bg: '#e07a5f' }, { emoji: '🦈', bg: '#3d5a80' }, { emoji: '🐳', bg: '#0077b6' },
+  { emoji: '🦜', bg: '#f94144' }, { emoji: '🐝', bg: '#f9c74f' }, { emoji: '🐞', bg: '#e63946' },
+  { emoji: '🌵', bg: '#606c38' }, { emoji: '🌸', bg: '#f48fb1' }, { emoji: '🌊', bg: '#00b4d8' },
+  { emoji: '🔥', bg: '#f25c54' }, { emoji: '⭐', bg: '#f9d71c' }, { emoji: '🌙', bg: '#7209b7' },
+  { emoji: '☀️', bg: '#fb8500' }, { emoji: '🌈', bg: '#8338ec' }, { emoji: '🍀', bg: '#40916c' },
+  { emoji: '🎯', bg: '#d62828' }, { emoji: '🎸', bg: '#bc6c25' }, { emoji: '🎮', bg: '#1b4332' },
+  { emoji: '🎨', bg: '#7209b7' }, { emoji: '🎭', bg: '#3a0ca3' }, { emoji: '🎤', bg: '#a61c3c' },
+  { emoji: '🎧', bg: '#283618' }, { emoji: '🏀', bg: '#e36414' }, { emoji: '⚽', bg: '#2d6a4f' },
+  { emoji: '🏈', bg: '#9c6644' }, { emoji: '⚾', bg: '#b08968' }, { emoji: '🎾', bg: '#80b918' },
+  { emoji: '🏐', bg: '#38b000' }, { emoji: '🥊', bg: '#d00000' }, { emoji: '🚀', bg: '#480ca8' },
+  { emoji: '✈️', bg: '#3a86ff' }, { emoji: '🚗', bg: '#9d4edd' }, { emoji: '🚲', bg: '#023e8a' },
+  { emoji: '🏎️', bg: '#dc2f02' }, { emoji: '🚁', bg: '#0077b6' }, { emoji: '⛵', bg: '#03045e' },
+  { emoji: '🧠', bg: '#c77dff' }, { emoji: '👁️', bg: '#4ea8de' }, { emoji: '💎', bg: '#0096c7' },
+  { emoji: '🔮', bg: '#5a189a' }, { emoji: '⚡', bg: '#fca311' }, { emoji: '💀', bg: '#343a40' },
+  { emoji: '👾', bg: '#7400b8' }, { emoji: '🤖', bg: '#4a4e69' }, { emoji: '👻', bg: '#10002b' },
+  { emoji: '🎃', bg: '#e85d04' }, { emoji: '🤠', bg: '#9a8c98' }, { emoji: '👑', bg: '#f4a261' },
+  { emoji: '🕶️', bg: '#22223b' }, { emoji: '🧙', bg: '#3d348b' }, { emoji: '🧛', bg: '#5c0001' },
+  { emoji: '🦸', bg: '#e63946' }, { emoji: '🎅', bg: '#bf0603' }, { emoji: '🧚', bg: '#f8a5c2' },
+  { emoji: '🍕', bg: '#d00000' }, { emoji: '🍔', bg: '#9c6644' }, { emoji: '🌮', bg: '#c4956a' },
+  { emoji: '🍣', bg: '#e07a5f' }, { emoji: '🧁', bg: '#f48fb1' }, { emoji: '🍩', bg: '#bc6c25' },
+  { emoji: '☕', bg: '#7f4f24' }, { emoji: '🍺', bg: '#fca311' }, { emoji: '🍷', bg: '#9d0208' },
+  { emoji: '🌍', bg: '#0077b6' }, { emoji: '🏔️', bg: '#4a4e69' }, { emoji: '🌋', bg: '#dc2f02' },
+  { emoji: '🌲', bg: '#2d6a4f' }, { emoji: '🏝️', bg: '#0077b6' }, { emoji: '🏰', bg: '#7b2cbf' },
+  { emoji: '🎡', bg: '#e36414' }, { emoji: '🗽', bg: '#023e8a' }, { emoji: '🕌', bg: '#9a8c98' },
+  { emoji: '📷', bg: '#1b4332' }, { emoji: '💻', bg: '#283618' }, { emoji: '📚', bg: '#606c38' },
+  { emoji: '🎬', bg: '#d62828' }, { emoji: '🎵', bg: '#7209b7' }, { emoji: '📡', bg: '#3a86ff' },
+  { emoji: '🔭', bg: '#480ca8' }, { emoji: '🧪', bg: '#52b788' }, { emoji: '🔬', bg: '#457b9d' },
+  { emoji: '🛠️', bg: '#9c6644' }, { emoji: '🧲', bg: '#4ea8de' }, { emoji: '💡', bg: '#f9c74f' },
+  { emoji: '🕯️', bg: '#fb8500' }, { emoji: '🔑', bg: '#f4a261' }, { emoji: '🛡️', bg: '#3d5a80' },
+  { emoji: '⚔️', bg: '#9d0208' }, { emoji: '🏆', bg: '#fca311' }, { emoji: '🥇', bg: '#c77dff' },
+];
+
+function getAvatar(index) {
+  const idx = parseInt(index) || 0;
+  return AVATARS[idx % AVATARS.length] || AVATARS[0];
+}
+
+function getSavedAvatar() {
+  const idx = localStorage.getItem('sl_avatar');
+  return idx !== null ? getAvatar(parseInt(idx)) : null;
+}
+
+function getSavedAvatarIndex() {
+  const idx = localStorage.getItem('sl_avatar');
+  return idx !== null ? parseInt(idx) : -1;
+}
+
+function saveAvatar(index) {
+  localStorage.setItem('sl_avatar', index);
+  updateProfileButton();
+  syncToServer();
+}
+
+function updateProfileButton() {
+  const avatar = getSavedAvatar();
+  const btn = document.getElementById('profile-avatar');
+  const trigger = document.getElementById('profile-btn');
+  if (!btn) return;
+
+  if (currentUser && avatar) {
+    btn.textContent = avatar.emoji;
+    btn.style.background = 'none';
+    trigger.classList.add('signed-in', 'has-avatar');
+  } else if (currentUser) {
+    // Use first letter of username
+    const name = (currentUser.email || '').replace('@streamlocal.user', '') || '?';
+    btn.textContent = name.charAt(0).toUpperCase();
+    btn.style.background = '#e63946';
+    trigger.classList.add('signed-in');
+    trigger.classList.remove('has-avatar');
+  } else {
+    btn.textContent = '👤';
+    btn.style.background = 'none';
+    trigger.classList.remove('signed-in', 'has-avatar');
+  }
+}
+
+function updateProfileDropdown() {
+  const signedIn = !!currentUser;
+  document.getElementById('pd-signin-btn').style.display = signedIn ? 'none' : 'flex';
+  document.getElementById('pd-settings-btn').style.display = signedIn ? 'flex' : 'none';
+  document.getElementById('pd-avatar-btn').style.display = signedIn ? 'flex' : 'none';
+  document.getElementById('pd-divider2').style.display = signedIn ? 'block' : 'none';
+  document.getElementById('pd-signout-btn').style.display = signedIn ? 'flex' : 'none';
+
+  const nameDisplay = document.getElementById('pd-name');
+  const emailDisplay = document.getElementById('pd-email');
+  const avatarDisplay = document.getElementById('pd-avatar');
+
+  if (signedIn) {
+    const displayName = (currentUser.email || '').replace('@streamlocal.user', '') || 'User';
+    nameDisplay.textContent = displayName;
+    emailDisplay.textContent = 'Signed in';
+    const avatar = getSavedAvatar();
+    avatarDisplay.textContent = avatar ? avatar.emoji : '👤';
+  } else {
+    nameDisplay.textContent = 'Guest';
+    emailDisplay.textContent = 'Not signed in';
+    avatarDisplay.textContent = '👤';
+  }
+}
+
+function toggleProfileDropdown() {
+  const dd = document.getElementById('profile-dropdown');
+  dd.classList.toggle('open');
+  updateProfileDropdown();
+}
+
+function closeProfileDropdown() {
+  document.getElementById('profile-dropdown').classList.remove('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.nav-profile')) {
+    document.getElementById('profile-dropdown')?.classList.remove('open');
+  }
+});
+
+function openAvatarPicker() {
+  const modal = document.getElementById('avatar-picker-modal');
+  const grid = document.getElementById('avatar-grid');
+  if (!modal || !grid) return;
+  
+  const currentIdx = getSavedAvatarIndex();
+  
+  grid.innerHTML = AVATARS.map((a, i) => `
+    <div class="avatar-option ${i === currentIdx ? 'selected' : ''}"
+         style="background:${a.bg};"
+         onclick="selectAvatar(${i})"
+         title="${a.emoji}">${a.emoji}</div>
+  `).join('');
+  
+  modal.classList.add('open');
+}
+
+function closeAvatarPicker() {
+  document.getElementById('avatar-picker-modal')?.classList.remove('open');
+}
+
+function selectAvatar(index) {
+  saveAvatar(index);
+  // Update selected state in grid
+  document.querySelectorAll('.avatar-option').forEach((el, i) => {
+    el.classList.toggle('selected', i === index);
+  });
+  closeAvatarPicker();
+}
 
 /* ===== SUPABASE ACCOUNTS ===== *
  * 1. Create a free Supabase project at https://supabase.com
@@ -6039,6 +6678,8 @@ function updateAuthUI(user) {
     title.textContent = 'Account';
     subtitle.textContent = 'Sign up to sync your lists and settings across devices.';
   }
+  updateProfileButton();
+  updateProfileDropdown();
 }
 
 async function authSignup() {
@@ -6058,6 +6699,10 @@ async function authSignup() {
     updateAuthUI(currentUser);
     document.getElementById('auth-username').value = '';
     document.getElementById('auth-password').value = '';
+    // Prompt to pick an avatar if they haven't yet
+    if (!localStorage.getItem('sl_avatar')) {
+      setTimeout(() => openAvatarPicker(), 500);
+    }
     await syncToServer();
   } else {
     // Email confirm is ON — tell user to log in directly
@@ -6109,7 +6754,8 @@ function getAppData() {
     sources: (() => { try { return JSON.parse(localStorage.getItem('aether_v4_sources')) || []; } catch(e) { return []; } })(),
     sports_sources: (() => { try { return JSON.parse(localStorage.getItem('streamlocal_sports_sources')) || []; } catch(e) { return []; } })(),
     theme: localStorage.getItem('aether_v2_theme') || 'dark',
-    style: localStorage.getItem('aether_v2_style') || 'new'
+    style: localStorage.getItem('aether_v2_style') || 'new',
+    avatar: localStorage.getItem('sl_avatar') || ''
   };
 }
 
@@ -6154,6 +6800,10 @@ async function loadFromServer() {
     localStorage.setItem('aether_v2_style', d.style);
     document.documentElement.setAttribute('data-style', d.style);
   }
+  if (d.avatar) {
+    localStorage.setItem('sl_avatar', d.avatar);
+  }
+  updateProfileButton();
 }
 
 function setSyncStatus(msg) {
@@ -6363,6 +7013,123 @@ function renderSportsSourceSettings() {
       </div>
     </div>
   `).join('');
+}
+
+/* ===== PERSONALIZATION SETTINGS ===== */
+function loadPlaybackSettings() {
+  const remember = localStorage.getItem('sl_remember_source') !== 'false'; // default true
+  document.getElementById('setting-remember-source').checked = remember;
+
+  const autoSkip = localStorage.getItem('sl_auto_skip') !== 'false'; // default true
+  document.getElementById('setting-auto-skip').checked = autoSkip;
+
+  const timeout = parseInt(localStorage.getItem('sl_skip_timeout')) || 8000;
+  const sel = document.getElementById('setting-skip-timeout');
+  if (sel) sel.value = String(timeout);
+}
+
+function setRememberSource(val) {
+  localStorage.setItem('sl_remember_source', val);
+}
+
+function setAutoSkip(val) {
+  localStorage.setItem('sl_auto_skip', val);
+}
+
+function setSkipTimeout(ms) {
+  localStorage.setItem('sl_skip_timeout', ms);
+}
+
+function getRememberSource() {
+  return localStorage.getItem('sl_remember_source') !== 'false';
+}
+
+function getAutoSkip() {
+  return localStorage.getItem('sl_auto_skip') !== 'false';
+}
+
+function getSkipTimeout() {
+  return parseInt(localStorage.getItem('sl_skip_timeout')) || 8000;
+}
+
+/* ===== ANNOUNCEMENT POPUPS ===== */
+const ADBLOCK_URL = 'https://chromewebstore.google.com/detail/adblock-%E2%80%94-block-ads-acros/gighmmpiobklfepjocnamgkkbiglidom?hl=en-US';
+
+function checkAnnouncements() {
+  const sawSports = localStorage.getItem('sl_saw_sports_announce');
+  const sawAdblock = localStorage.getItem('sl_saw_adblock_announce');
+
+  if (!sawSports) {
+    showAnnouncement('sports');
+  } else if (!sawAdblock && !isMobile()) {
+    showAnnouncement('adblock');
+  }
+}
+
+function isMobile() {
+  return window.innerWidth < 1024 || 'ontouchstart' in window;
+}
+
+function showAnnouncement(type) {
+  const overlay = document.getElementById('announcement-overlay');
+  const content = document.getElementById('announce-content');
+  if (!overlay || !content) return;
+
+  if (type === 'sports') {
+    content.innerHTML = `
+      <div class="announce-icon sports">⚽</div>
+      <div class="announce-title">Live Sports Are Here</div>
+      <div class="announce-desc">
+        Stream Local now has <strong>live sports</strong> — NFL, NBA, Soccer, UFC, MLB, NHL and more.
+        Click the <strong>⚽ Sports</strong> tab to see what's playing now.
+      </div>
+      <div class="announce-actions">
+        <button class="btn btn-primary" onclick="dismissAnnouncement('sports')">Got it</button>
+        <button class="btn btn-secondary" onclick="dismissAndGoSports()">Take me there</button>
+      </div>
+    `;
+  } else if (type === 'adblock') {
+    content.innerHTML = `
+      <div class="announce-icon shield">🛡️</div>
+      <div class="announce-title">Heads Up</div>
+      <div class="announce-desc">
+        Streaming sources may show occasional pop-up ads. For the best experience on desktop,
+        we highly recommend using an ad blocker.
+      </div>
+      <div class="announce-actions">
+        <a class="announce-link-btn" href="${ADBLOCK_URL}" target="_blank" rel="noopener">
+          Get AdBlock
+        </a>
+        <button class="btn btn-secondary" onclick="dismissAnnouncement('adblock')">No thanks</button>
+      </div>
+    `;
+  }
+
+  overlay.classList.add('open');
+  overlay._type = type;
+}
+
+function dismissAnnouncement(type) {
+  const overlay = document.getElementById('announcement-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('open');
+
+  const t = type || overlay._type || 'sports';
+  if (t === 'sports') {
+    localStorage.setItem('sl_saw_sports_announce', '1');
+    // After sports popup, check if adblock should show next
+    if (!localStorage.getItem('sl_saw_adblock_announce') && !isMobile()) {
+      setTimeout(() => showAnnouncement('adblock'), 400);
+    }
+  } else if (t === 'adblock') {
+    localStorage.setItem('sl_saw_adblock_announce', '1');
+  }
+}
+
+function dismissAndGoSports() {
+  dismissAnnouncement('sports');
+  // Short delay for overlay to close, then switch
+  setTimeout(() => toggleSportsMode(), 350);
 }
 
 /* ===== SPORTS API (SportSRC) ===== */
@@ -6635,12 +7402,13 @@ function loadSportsEmbedDirect(embedUrl) {
     document.getElementById('embed-loading').style.display = 'none';
     setTimeout(showSportsPlayerHint, 500);
   };
+  const sportSrcTimeout = Math.max(getSkipTimeout(), 10000);
   failoverTimer = setTimeout(() => {
     if (document.getElementById('embed-loading').style.display !== 'none') {
       document.getElementById('embed-status').textContent = 'SportSRC timed out — try a fallback source';
       setTimeout(() => document.getElementById('embed-loading').style.display = 'none', 2000);
     }
-  }, 10000);
+  }, sportSrcTimeout);
 }
 
 function loadSportsEmbed() {
@@ -6666,11 +7434,16 @@ function loadSportsEmbed() {
     document.getElementById('embed-loading').style.display = 'none';
   };
 
-  failoverTimer = setTimeout(() => {
-    if (document.getElementById('embed-loading').style.display !== 'none') {
-      switchSportsSource(1);
+  if (getAutoSkip()) {
+    const timeout = getSkipTimeout();
+    if (timeout > 0) {
+      failoverTimer = setTimeout(() => {
+        if (document.getElementById('embed-loading').style.display !== 'none') {
+          switchSportsSource(1);
+        }
+      }, timeout);
     }
-  }, 8000);
+  }
 }
 
 function switchSportsSource(idx) {
@@ -7743,10 +8516,12 @@ async function openMedia(id, type, inS = null, inE = null) {
   currentMedia = { id, type, meta: { title: `TMDB ID: ${id}`, name: `TMDB ID: ${id}` } };
   currentSeason = s; currentEp = e;
   currentSrc = 0;
-  const lastSrcName = localStorage.getItem('aether_v2_last_source');
-  if (lastSrcName) {
-    const foundIdx = SOURCES.findIndex(x => x.name === lastSrcName);
-    if (foundIdx !== -1) currentSrc = foundIdx;
+  if (getRememberSource()) {
+    const lastSrcName = localStorage.getItem('aether_v2_last_source');
+    if (lastSrcName) {
+      const foundIdx = SOURCES.findIndex(x => x.name === lastSrcName);
+      if (foundIdx !== -1) currentSrc = foundIdx;
+    }
   }
   allSeasons = [];
 
@@ -7825,11 +8600,14 @@ function loadEmbed() {
     document.getElementById('embed-loading').style.display = 'none';
   };
 
-  failoverTimer = setTimeout(() => {
-    if (document.getElementById('embed-loading').style.display !== 'none') {
-      skipSource();
-    }
-  }, 8000);
+  const skipTimeout = getSkipTimeout();
+  if (skipTimeout > 0 && getAutoSkip()) {
+    failoverTimer = setTimeout(() => {
+      if (document.getElementById('embed-loading').style.display !== 'none') {
+        skipSource();
+      }
+    }, skipTimeout);
+  }
 
   // Start next-episode auto-detection (TV only, estimate-based)
   startNextEpTracking();
@@ -8158,6 +8936,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Init Supabase (must happen early — restores session from localStorage)
   initSupabase();
 
+  // Init profile/avatar button
+  updateProfileButton();
+  updateProfileDropdown();
+
   // Init sports data
   loadSportsSources();
   loadSportsGames();
@@ -8170,6 +8952,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   loadHistory();
   loadWatchlist();
+  loadPlaybackSettings();
+
+  // Show onboarding popups after a beat
+  setTimeout(checkAnnouncements, 800);
+
   document.getElementById('theme-select').value = savedTheme;
   document.getElementById('style-select').value = savedStyle;
 
