@@ -1249,6 +1249,12 @@ nav.scrolled {
   font-size: 14px;
 }
 
+/* Mobile-only buttons — hidden on desktop by default */
+#playpause-btn,
+#fullscreen-btn {
+  display: none;
+}
+
 .panel-toggle:hover {
   background: rgba(255, 255, 255, 0.2);
 }
@@ -4442,6 +4448,17 @@ nav.scrolled {
     max-width: 100%;
   }
 
+  /* Show mobile-only player buttons on tablet+phone */
+  #playpause-btn,
+  #fullscreen-btn {
+    display: inline-flex !important;
+  }
+
+  /* Hide prev button on mobile */
+  #prev-ep-btn {
+    display: none !important;
+  }
+
   /* Settings — prevent horizontal overflow */
   #view-settings {
     overflow-x: hidden !important;
@@ -4567,6 +4584,12 @@ nav.scrolled {
   .player-controls {
     width: 100%;
     justify-content: space-between;
+  }
+
+  /* Show mobile-only player buttons */
+  #playpause-btn,
+  #fullscreen-btn {
+    display: inline-flex !important;
   }
   .panel-toggle {
     font-size: 12px;
@@ -5528,20 +5551,6 @@ nav.scrolled {
     </div>
   </div>
 
-  <!-- DOWNLOAD MODAL -->
-  <div id="download-modal" class="modal-overlay"
-    onclick="if(event.target === this) document.getElementById('download-modal').classList.remove('open')"
-    style="z-index: 3000;">
-    <div class="modal-content" style="max-width: 700px; padding: 24px;">
-      <button class="modal-close"
-        onclick="document.getElementById('download-modal').classList.remove('open')">&times;</button>
-      <h2 style="margin-bottom: 4px; font-size: 22px;">📥 Download (BETA)</h2>
-      <div id="download-options" style="margin-top: 16px;">
-        <div class="spinner" style="margin: 0 auto;"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- NAV -->
   <nav id="navbar">
     <div class="logo" onclick="switchView('home')">Stream Local</div>
@@ -5860,7 +5869,8 @@ nav.scrolled {
         <span>←</span> <span class="player-title" id="player-title">Loading...</span>
       </button>
       <div class="player-controls">
-        <button id="download-btn" class="panel-toggle" onclick="openDownloadModal()">📥 Download (BETA)</button>
+        <button id="playpause-btn" class="panel-toggle" onclick="togglePlayerPlayback()">⏸</button>
+        <button id="fullscreen-btn" class="panel-toggle" onclick="toggleOverlayFullscreen()">⛶</button>
         <button id="prev-ep-btn" class="panel-toggle" onclick="prevEpisode()" style="display:none;">⏮ Prev</button>
         <button id="next-ep-btn" class="panel-toggle" onclick="nextEpisode()" style="display:none;">⏭ Next</button>
         <button class="panel-toggle sports-fs-btn" onclick="toggleSportsFullscreen()">⛶ Fullscreen</button>
@@ -5899,9 +5909,6 @@ nav.scrolled {
         <h4>Episodes</h4>
         <select class="season-select" id="season-select" onchange="changeSeason(this.value)"></select>
         <div class="eps-grid" id="eps-grid"></div>
-        <button class="btn btn-secondary"
-          style="width:100%; margin-top:16px; justify-content:center; padding:8px; font-size:12px;"
-          onclick="downloadSeasonBatch()">📦 IDM Batch Download (BETA)</button>
       </div>
 
       <div class="panel-section">
@@ -6559,6 +6566,7 @@ function openSportsGame(gameId) {
 
   const title = game.away ? `${game.home} vs ${game.away}` : game.home;
   document.getElementById('player-title').textContent = title;
+  setupMediaSession(title, `${game.league} Sports`);
 
   // Open player — add sports-mode class
   playerOpenTime = Date.now();
@@ -6606,11 +6614,10 @@ function renderSportsPlayerPanel() {
     ).join('');
   document.getElementById('server-list').innerHTML = servHtml || '<div style="color:var(--muted);padding:10px;font-size:13px;">No fallback sources configured.</div>';
 
-  // Hide TV controls and download button in sports mode
+  // Hide TV controls in sports mode
   document.getElementById('panel-tv-controls').style.display = 'none';
   document.getElementById('prev-ep-btn').style.display = 'none';
   document.getElementById('next-ep-btn').style.display = 'none';
-  document.getElementById('download-btn').style.display = 'none';
 
   // Show sports fullscreen button
   const fsBtn = document.querySelector('.sports-fs-btn');
@@ -7756,6 +7763,10 @@ async function openMedia(id, type, inS = null, inE = null) {
   renderPlayerPanel();
   loadEmbed();
   saveHistory(id, type, currentMedia.meta, s, e);
+  // Setup media session for device controls
+  const metaTitle = currentMedia.meta.title || currentMedia.meta.name;
+  const epLabel = type === 'tv' ? ` S${s} E${e}` : '';
+  setupMediaSession(metaTitle + epLabel, 'Stream Local');
 }
 
 function renderPlayerPanel() {
@@ -7764,6 +7775,10 @@ function renderPlayerPanel() {
   const titleText = title + (currentMedia.type === 'tv' ? ` - S${currentSeason} E${currentEp}` : '');
   document.getElementById('player-title').textContent = titleText;
   document.title = titleText + " — Stream Local";
+  setupMediaSession(titleText, 'Stream Local');
+  
+  // Reset play/pause to playing state
+  updatePlayPauseIcon(false);
 
   // Servers
   const servHtml = SOURCES.map((x, i) => `<button class="server-btn ${i === currentSrc ? 'active' : ''}" onclick="switchSource(${i})">${x.name}</button>`).join('');
@@ -7899,6 +7914,9 @@ function closePlayer() {
   const hint = document.getElementById('sports-player-hint');
   if (hint) hint.classList.remove('visible');
 
+  // Reset play/pause
+  updatePlayPauseIcon(false);
+
   if (currentMode === 'sports') {
     currentSportsGame = null;
     currentSportSrc = 0;
@@ -7988,6 +8006,80 @@ function toggleFullscreen() {
   }
 }
 
+/* ===== MEDIA SESSION & PLAY/PAUSE ===== */
+let playerIsPaused = false;
+
+function setupMediaSession(title, subtitle) {
+  if (!navigator.mediaSession) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: title || 'Stream Local',
+      artist: subtitle || '',
+      artwork: [{ src: '', sizes: '512x512', type: 'image/png' }]
+    });
+    navigator.mediaSession.playbackState = 'playing';
+  } catch(e) {}
+
+  // Register action handlers so device media controls (notification shade,
+  // lock screen, earbuds, watch) can play/pause without triggering popup ads
+  try {
+    navigator.mediaSession.setActionHandler('play', () => {
+      playerIsPaused = false;
+      const btn = document.getElementById('playpause-btn');
+      if (btn) btn.textContent = '⏸';
+      navigator.mediaSession.playbackState = 'playing';
+    });
+    navigator.mediaSession.setActionHandler('pause', () => {
+      playerIsPaused = true;
+      const btn = document.getElementById('playpause-btn');
+      if (btn) btn.textContent = '▶';
+      navigator.mediaSession.playbackState = 'paused';
+    });
+  } catch(e) {}
+}
+
+function togglePlayerPlayback() {
+  const btn = document.getElementById('playpause-btn');
+  if (!btn) return;
+
+  if (navigator.mediaSession) {
+    playerIsPaused = !playerIsPaused;
+    navigator.mediaSession.playbackState = playerIsPaused ? 'paused' : 'playing';
+    btn.textContent = playerIsPaused ? '▶' : '⏸';
+
+    // Best-effort: dispatch a pointer event at the iframe center.
+    // On most source sites this area is the video player itself,
+    // same as the user tapping the video (not ad zones).
+    // The device media notification (swipe-down) is the reliable way.
+    pointerTapIframe();
+  }
+}
+
+function pointerTapIframe() {
+  const iframe = document.getElementById('player-iframe');
+  if (!iframe) return;
+  try {
+    // Attempt to pass through — dispatch pointer event to the iframe
+    const rect = iframe.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const el = document.elementFromPoint(cx, cy);
+    if (el && iframe.contains(el)) {
+      el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, clientX: cx, clientY: cy }));
+      el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true, clientX: cx, clientY: cy }));
+    }
+  } catch(e) { /* silent — cross-origin may throw */ }
+}
+
+function updatePlayPauseIcon(paused) {
+  playerIsPaused = paused;
+  const btn = document.getElementById('playpause-btn');
+  if (btn) btn.textContent = paused ? '▶' : '⏸';
+  if (navigator.mediaSession) {
+    navigator.mediaSession.playbackState = paused ? 'paused' : 'playing';
+  }
+}
+
 function handleFullscreenChange() {
   const overlay = document.getElementById('player-overlay');
   const fe = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
@@ -8055,81 +8147,6 @@ document.addEventListener('msfullscreenchange', handleFullscreenChange);
 
 function corsProxy(url) {
   return fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
-}
-
-function openDownloadModal() {
-  const modal = document.getElementById('download-modal');
-  const optionsContainer = document.getElementById('download-options');
-  modal.classList.add('open');
-
-  const title = currentMedia.meta.title || currentMedia.meta.name || '';
-  const epLabel = currentMedia.type === 'tv' ? ` S${currentSeason}E${currentEp}` : '';
-  const isTv = currentMedia.type === 'tv';
-
-  // Build links from all sources for this media
-  const links = SOURCES.map((src, i) => {
-    let url;
-    if (isTv) {
-      url = (src.tv || '').replace(/\{id\}/g, currentMedia.id).replace(/\{s\}/g, currentSeason).replace(/\{e\}/g, currentEp);
-    } else {
-      url = (src.movie || '').replace(/\{id\}/g, currentMedia.id);
-    }
-    return { name: src.name, url, index: i };
-  }).filter(l => l.url);
-
-  // Highlight current source
-  const currentName = SOURCES[currentSrc]?.name;
-
-  optionsContainer.innerHTML = `
-    <div style="margin-bottom:16px;">
-      <div style="font-size:16px; font-weight:600;">${title}${epLabel}</div>
-      <div style="font-size:12px; color:var(--muted); margin-top:4px;">Open in new tab to watch or save</div>
-    </div>
-    ${links.map(l => `
-      <div style="background:rgba(255,255,255,0.04); padding:12px 16px; border-radius:8px; display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; border:1px solid ${l.name === currentName ? 'var(--accent)' : 'rgba(255,255,255,0.06)'};">
-        <div>
-          <span style="font-weight:600; font-size:14px;">${l.name}</span>
-          ${l.name === currentName ? '<span style="font-size:11px; color:var(--accent); margin-left:6px;">● Active</span>' : ''}
-        </div>
-        <a class="btn btn-primary" href="${l.url}" target="_blank" rel="noopener" style="padding:8px 16px; font-size:13px; border-radius:6px; text-decoration:none; white-space:nowrap; background:var(--accent); color:#fff;">▶ Open</a>
-      </div>
-    `).join('')}
-    ${isTv ? `
-      <div style="margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.06);">
-        <button class="btn btn-secondary" onclick="downloadSeasonBatch()" style="width:100%; justify-content:center; padding:10px;">
-          📦 Export All Episode URLs for S${currentSeason}
-        </button>
-      </div>
-    ` : ''}
-    <div style="font-size:11px; color:var(--muted); margin-top:16px; text-align:center;">
-      Opens the stream URL in a new tab. Use browser save/download tools to keep the file.
-    </div>
-  `;
-}
-
-function downloadSeasonBatch() {
-  if (currentMedia.type !== 'tv') return;
-  const sData = allSeasons.find(s => s.season_number === currentSeason);
-  const count = sData ? sData.episode_count : parseInt(prompt("How many episodes?", "24")) || 24;
-
-  // Generate URLs from all sources for all episodes
-  let batch = `=== ${currentMedia.meta.name || 'Show'} - Season ${currentSeason} ===\n`;
-  batch += `Generated ${new Date().toLocaleString()}\n\n`;
-  
-  for (let src of SOURCES) {
-    if (!src.tv) continue;
-    batch += `\n--- ${src.name} ---\n`;
-    for (let i = 1; i <= count; i++) {
-      const url = src.tv.replace(/\{id\}/g, currentMedia.id).replace(/\{s\}/g, currentSeason).replace(/\{e\}/g, i);
-      batch += `E${i}: ${url}\n`;
-    }
-  }
-
-  const blob = new Blob([batch], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${(currentMedia.meta.name || 'Show').replace(/\s+/g, '_')}_S${currentSeason}_Stream_Urls.txt`;
-  a.click();
 }
 
 </script>
