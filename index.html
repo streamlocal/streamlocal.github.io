@@ -4,7 +4,7 @@
 <head>
   <!-- 1. Content Security Policy (CSP) -->
   <meta http-equiv="Content-Security-Policy"
-    content="script-src 'self' 'unsafe-inline' https://api.themoviedb.org https://api.allorigins.win; worker-src 'none'; object-src 'none';">
+    content="script-src 'self' 'unsafe-inline' https://api.themoviedb.org https://api.allorigins.win https://unpkg.com; worker-src 'none'; object-src 'none';">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stream Local — Premium Streaming</title>
@@ -5707,6 +5707,35 @@ nav.scrolled {
     <div class="settings-container" style="max-width: 900px; margin: 0 auto;">
       <h2 style="margin-bottom: 24px; font-size: 32px;">Settings</h2>
 
+      <div class="settings-card" id="auth-card">
+        <h3 id="auth-title">Account</h3>
+        <p id="auth-subtitle">Sign up to sync your lists and settings across devices.</p>
+        <div id="auth-logged-out">
+          <div style="display:flex; gap:10px; margin-top:16px;">
+            <input id="auth-username" class="input-base" placeholder="Username" style="flex:1;" autocomplete="username" />
+            <input id="auth-password" class="input-base" type="password" placeholder="Password" style="flex:1;" autocomplete="current-password" />
+          </div>
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn btn-primary" onclick="authSignup()" style="flex:1; justify-content:center;">Sign Up</button>
+            <button class="btn btn-secondary" onclick="authLogin()" style="flex:1; justify-content:center;">Log In</button>
+          </div>
+          <div id="auth-error" style="color:var(--accent); font-size:13px; margin-top:8px; display:none;"></div>
+        </div>
+        <div id="auth-logged-in" style="display:none;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+            <div>
+              <div style="font-size:14px; font-weight:600;" id="auth-user-label"></div>
+              <div style="font-size:12px; color:var(--muted);">Data syncs automatically</div>
+            </div>
+            <button class="btn btn-secondary" onclick="authLogout()" style="padding:8px 20px; font-size:13px;">Log Out</button>
+          </div>
+          <div style="margin-top:12px; font-size:12px; color:var(--muted);">
+            <span id="auth-sync-status">✅ Synced</span>
+            <button class="btn btn-secondary" onclick="forceSyncToServer()" style="padding:4px 12px; font-size:11px; margin-left:8px;">Sync Now</button>
+          </div>
+        </div>
+      </div>
+
       <div class="settings-card">
         <h3>Appearance</h3>
         <p>Customize the look and feel of Stream Local.</p>
@@ -5885,6 +5914,7 @@ nav.scrolled {
     <div id="f11-hint">⛶ Press F11 for true fullscreen (hides browser tabs)</div>
   </div>
 
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   
 <script>
 /* ===== STYLE & THEME SETUP ===== */
@@ -5894,6 +5924,7 @@ document.documentElement.setAttribute('data-style', savedStyle);
 function setStyle(styleName) {
   document.documentElement.setAttribute('data-style', styleName);
   localStorage.setItem('aether_v2_style', styleName);
+  syncToServer();
 }
 
 const savedTheme = localStorage.getItem('aether_v2_theme') || 'dark';
@@ -5902,6 +5933,7 @@ document.documentElement.setAttribute('data-theme', savedTheme);
 function setTheme(themeName) {
   document.documentElement.setAttribute('data-theme', themeName);
   localStorage.setItem('aether_v2_theme', themeName);
+  syncToServer();
 }
 
 /* ===== CONSTANTS & STATE ===== */
@@ -5935,6 +5967,221 @@ let idleTimer = null;
 let currentMode = 'home'; // 'home' | 'sports'
 let currentSportsGame = null;
 let currentSportSrc = 0;
+
+/* ===== SUPABASE ACCOUNTS ===== *
+ * 1. Create a free Supabase project at https://supabase.com
+ * 2. Go to Project Settings → API → copy your Project URL & anon key
+ * 3. Paste them below
+ * 4. Go to SQL Editor and run the SQL from the Supabase Setup Guide
+ *    (included at the end of this section as a comment)
+ * ============================================================ */
+const SUPABASE_URL = 'https://lvgnziipghjjbitnrgmp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z256aWlwZ2hqamJpdG5yZ21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjgwOTIsImV4cCI6MjA5Nzc0NDA5Mn0.IqxKiDEat4Zekm4m2flHmNnTcCKKOsybA2O1oJcLAEA';
+let supabaseClient = null;
+let currentUser = null;
+
+function initSupabase() {
+  if (!window.supabase) return;
+  if (SUPABASE_URL.includes('your-project')) {
+    console.warn('[Stream Local] Supabase: Set your URL and anon key in core.js');
+    return;
+  }
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, storageKey: 'streamlocal_auth' }
+  });
+  restoreSession();
+}
+
+async function restoreSession() {
+  if (!supabaseClient) return;
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    updateAuthUI(currentUser);
+    await loadFromServer();
+  }
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function updateAuthUI(user) {
+  const loggedOut = document.getElementById('auth-logged-out');
+  const loggedIn = document.getElementById('auth-logged-in');
+  const title = document.getElementById('auth-title');
+  const subtitle = document.getElementById('auth-subtitle');
+  const userLabel = document.getElementById('auth-user-label');
+  if (!loggedOut || !loggedIn) return;
+
+  if (user) {
+    loggedOut.style.display = 'none';
+    loggedIn.style.display = 'block';
+    title.textContent = 'Account';
+    subtitle.textContent = 'Your data syncs automatically.';
+    // Extract display name from email (username@streamlocal.user → username)
+    const displayName = user.email?.replace('@streamlocal.user', '') || 'Logged In';
+    if (userLabel) userLabel.textContent = `👤 ${displayName}`;
+  } else {
+    loggedOut.style.display = 'block';
+    loggedIn.style.display = 'none';
+    title.textContent = 'Account';
+    subtitle.textContent = 'Sign up to sync your lists and settings across devices.';
+  }
+}
+
+async function authSignup() {
+  const username = document.getElementById('auth-username')?.value.trim();
+  const password = document.getElementById('auth-password')?.value.trim();
+  if (!username || !password) return showAuthError('Enter a username and password.');
+  if (password.length < 6) return showAuthError('Password must be at least 6 characters.');
+  if (!supabaseClient) return showAuthError('Supabase not configured — set your URL + anon key in core.js');
+
+  const email = username + '@streamlocal.user';
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  if (error) return showAuthError(error.message);
+
+  if (data?.session) {
+    // Session returned = email confirm is off — go right in
+    currentUser = data.session.user;
+    updateAuthUI(currentUser);
+    document.getElementById('auth-username').value = '';
+    document.getElementById('auth-password').value = '';
+    await syncToServer();
+  } else {
+    // Email confirm is ON — tell user to log in directly
+    showAuthError('Account created! Now log in with your username and password.');
+  }
+}
+
+async function authLogin() {
+  const username = document.getElementById('auth-username')?.value.trim();
+  const password = document.getElementById('auth-password')?.value.trim();
+  if (!username || !password) return showAuthError('Enter your username and password.');
+  if (!supabaseClient) return showAuthError('Supabase not configured — set your URL + anon key in core.js');
+
+  const email = username + '@streamlocal.user';
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) return showAuthError(error.message);
+
+  currentUser = data.user;
+  updateAuthUI(currentUser);
+
+  // Pull server data into localStorage, merging with any local changes
+  await loadFromServer();
+
+  // Refresh the UI with synced data
+  loadSources();
+  loadHistory();
+  loadWatchlist();
+  if (TMDB_KEY && document.getElementById('view-home').classList.contains('active')) loadHome();
+}
+
+async function authLogout() {
+  if (!supabaseClient) return;
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  updateAuthUI(null);
+  document.getElementById('auth-username').value = '';
+  document.getElementById('auth-password').value = '';
+  // Reload local data — stays as-is from before login
+  loadSources();
+  loadHistory();
+  loadWatchlist();
+}
+
+/* ===== SUPABASE DATA SYNC ===== */
+function getAppData() {
+  return {
+    watchlist: (() => { try { return JSON.parse(localStorage.getItem('aether_v2_watchlist')) || []; } catch(e) { return []; } })(),
+    history: (() => { try { return JSON.parse(localStorage.getItem('aether_v2_history')) || []; } catch(e) { return []; } })(),
+    sources: (() => { try { return JSON.parse(localStorage.getItem('aether_v4_sources')) || []; } catch(e) { return []; } })(),
+    sports_sources: (() => { try { return JSON.parse(localStorage.getItem('streamlocal_sports_sources')) || []; } catch(e) { return []; } })(),
+    theme: localStorage.getItem('aether_v2_theme') || 'dark',
+    style: localStorage.getItem('aether_v2_style') || 'new'
+  };
+}
+
+async function syncToServer() {
+  if (!supabaseClient || !currentUser) return;
+  const appData = getAppData();
+  const { error } = await supabaseClient.from('user_data').upsert(
+    { user_id: currentUser.id, app_data: appData, updated_at: new Date().toISOString() },
+    { onConflict: 'user_id' }
+  );
+  setSyncStatus(error ? '⚠️ Sync failed' : '✅ Synced');
+}
+
+async function loadFromServer() {
+  if (!supabaseClient || !currentUser) return;
+  const { data, error } = await supabaseClient.from('user_data')
+    .select('app_data')
+    .eq('user_id', currentUser.id)
+    .maybeSingle();
+
+  if (error || !data?.app_data) return;
+  const d = data.app_data;
+
+  // Merge into localStorage — only overwrite if server has data
+  if (d.watchlist?.length) {
+    localStorage.setItem('aether_v2_watchlist', JSON.stringify(d.watchlist));
+  }
+  if (d.history?.length) {
+    localStorage.setItem('aether_v2_history', JSON.stringify(d.history));
+  }
+  if (d.sources?.length) {
+    localStorage.setItem('aether_v4_sources', JSON.stringify(d.sources));
+  }
+  if (d.sports_sources?.length) {
+    localStorage.setItem('streamlocal_sports_sources', JSON.stringify(d.sports_sources));
+  }
+  if (d.theme) {
+    localStorage.setItem('aether_v2_theme', d.theme);
+    document.documentElement.setAttribute('data-theme', d.theme);
+  }
+  if (d.style) {
+    localStorage.setItem('aether_v2_style', d.style);
+    document.documentElement.setAttribute('data-style', d.style);
+  }
+}
+
+function setSyncStatus(msg) {
+  const el = document.getElementById('auth-sync-status');
+  if (el) el.textContent = msg;
+}
+
+async function forceSyncToServer() {
+  setSyncStatus('⏳ Syncing...');
+  await syncToServer();
+}
+
+/* ============================================================
+   SUPABASE SETUP GUIDE
+   
+   Before anything else: In your Supabase dashboard, go to
+   Authentication → Settings → disable "Confirm email"
+   (otherwise signup will fail since we use fake emails).
+   
+   Then run this SQL in the Supabase SQL Editor:
+   
+   CREATE TABLE user_data (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
+     app_data JSONB NOT NULL DEFAULT '{"watchlist":[],"history":[],"sources":[],"sports_sources":[],"theme":"dark","style":"new"}',
+     created_at TIMESTAMPTZ DEFAULT now(),
+     updated_at TIMESTAMPTZ DEFAULT now()
+   );
+   
+   ALTER TABLE user_data ENABLE ROW LEVEL SECURITY;
+   
+   CREATE POLICY "user_data_select" ON user_data FOR SELECT USING (auth.uid() = user_id);
+   CREATE POLICY "user_data_insert" ON user_data FOR INSERT WITH CHECK (auth.uid() = user_id);
+   CREATE POLICY "user_data_update" ON user_data FOR UPDATE USING (auth.uid() = user_id);
+   ============================================================ */
 
 let preloadQueue = [];
 let isPreloading = false;
@@ -5996,6 +6243,7 @@ function loadSources() {
 function saveSources() {
   localStorage.setItem('aether_v4_sources', JSON.stringify(SOURCES));
   renderSourceSettings();
+  syncToServer();
 }
 
 function renderSourceSettings() {
@@ -6058,6 +6306,7 @@ function loadSportsSources() {
 
 function saveSportsSources() {
   localStorage.setItem('streamlocal_sports_sources', JSON.stringify(SPORTS_SOURCES));
+  syncToServer();
 }
 
 function addSportsSource() {
@@ -7097,6 +7346,7 @@ function toggleWatchlist(id, type, title, poster) {
   loadWatchlist();
   document.getElementById('theme-select').value = savedTheme;
   document.getElementById('style-select').value = savedStyle;
+  syncToServer();
 }
 
 /* ===== DETAILS MODAL ===== */
@@ -7408,6 +7658,7 @@ function saveHistory(id, type, meta, s, e, addedProgress = 0) {
   loadWatchlist();
   document.getElementById('theme-select').value = savedTheme;
   document.getElementById('style-select').value = savedStyle;
+  syncToServer();
 }
 
 function loadHistory() {
@@ -7887,6 +8138,9 @@ function downloadSeasonBatch() {
 <script>
 /* ===== INIT & EVENTS ===== */
 document.addEventListener('DOMContentLoaded', () => {
+  // Init Supabase (must happen early — restores session from localStorage)
+  initSupabase();
+
   // Init sports data
   loadSportsSources();
   loadSportsGames();
