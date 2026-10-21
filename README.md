@@ -28,7 +28,7 @@ Stream Local runs entirely in your browser. No server setup or installation is r
 
 ## ⚙️ How It Works
 
-This project is a static single-page application (SPA) contained entirely within `index.html`. It utilizes plain HTML, CSS, and Vanilla JavaScript. 
+This project is a static single-page application (SPA) using plain HTML, CSS, and Vanilla JavaScript. `index.html` contains the interface and styles; `playback.js` contains the managed source catalog, saved-list migrations, and playback monitoring. 
 
 * **Metadata:** Fetched via TMDB API.
 * **Video Playback:** Handled by dynamically embedding third-party host URLs into an iframe.
@@ -37,3 +37,11 @@ This project is a static single-page application (SPA) contained entirely within
 ## ⚠️ Disclaimer
 
 **Stream Local does not host, upload, or manage any media files.** This project simply functions as a client-side search engine and UI wrapper that displays content from third-party providers on the web. We have no control over the media put up by third-party sites. All legal issues, DMCA requests, or copyright takedowns should be directed to the respective third-party platforms hosting the files.
+
+## Playback maintenance
+
+CineSrc, MoviesAPI, and VixSrc are first in the source catalog. Existing browser lists, synced profiles, and imported profiles receive catalog updates while retaining custom sources and intentional deletions. Provider availability and video quality vary by title.
+
+To update the catalog, edit `playback.js`, increase its `revision`, assign that revision to genuinely new entries' `added` field, and update the script version in `index.html`. Playback monitoring uses active-frame, origin-checked media events where supported; loading an iframe document alone does not prove that video works. Legacy players without events retain manual source switching. Automatic fallback stops after one pass.
+
+Run the regression checks with `node --test tests/playback.test.cjs`.

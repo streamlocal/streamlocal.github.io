@@ -1878,6 +1878,13 @@ nav.scrolled {
   z-index: 5;
 }
 
+.playback-status {
+  position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+  max-width: 85%; padding: 12px 18px; border-radius: 8px; background: rgba(15,15,20,.94);
+  color: white; z-index: 12; display: none; text-align: center; font-size: 14px;
+}
+.playback-status button { margin-left: 12px; padding: 6px 12px; cursor: pointer; }
+
 .spinner {
   width: 50px;
   height: 50px;
@@ -6666,7 +6673,8 @@ nav.scrolled {
         <div style="font-size:14px; color:var(--muted);" id="embed-status">Connecting to server...</div>
       </div>
 
-      <iframe id="player-iframe" allowfullscreen referrerpolicy="origin"></iframe>
+      <iframe id="player-iframe" title="Video player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="origin"></iframe>
+      <div id="playback-status" class="playback-status" role="status" aria-live="polite"></div>
 
       <!-- Floating Next Episode button — appears at bottom-right when episode is almost over -->
       <button id="next-ep-floating" class="next-ep-floating" style="display:none;" onclick="nextEpisode()">
@@ -6704,6 +6712,7 @@ nav.scrolled {
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   
+<script src="playback.js?v=20261021"></script>
 <script>
 /* ===== STYLE & THEME SETUP ===== */
 const savedStyle = localStorage.getItem('aether_v2_style') || 'new';
@@ -6729,16 +6738,7 @@ const TMDB_BASE = 'https://api.themoviedb.org/3';
 const IMG = 'https://image.tmdb.org/t/p/w300';
 const IMG_BG = 'https://image.tmdb.org/t/p/original';
 
-const DEFAULT_SOURCES = [
-  { name: 'VidEasy', movie: 'https://player.videasy.net/movie/{id}?autoplay=1', tv: 'https://player.videasy.net/tv/{id}/{s}/{e}?autoplay=1' },
-  { name: '111Movies', movie: 'https://111movies.net/movie/{id}?autoplay=1', tv: 'https://111movies.net/tv/{id}/{s}/{e}?autoplay=1' },
-  { name: 'VidCore', movie: 'https://www.vidcore.org/embed/movie/{id}', tv: 'https://www.vidcore.org/embed/tv/{id}/{s}/{e}' },
-  { name: 'AutoEmbed', movie: 'https://autoembed.co/movie/tmdb/{id}', tv: 'https://autoembed.co/tv/tmdb/{id}-{s}-{e}' },
-  { name: '2Embed.cc', movie: 'https://www.2embed.cc/embed/{id}', tv: 'https://www.2embed.cc/embedtv/{id}&s={s}&e={e}' },
-  { name: '2Embed.Skin', movie: 'https://www.2embed.skin/embed/{id}', tv: 'https://www.2embed.skin/embedtv/{id}&s={s}&e={e}' },
-  { name: 'MultiEmbed', movie: 'https://multiembed.mov/?video_id={id}&tmdb=1', tv: 'https://multiembed.mov/?video_id={id}&tmdb=1&s={s}&e={e}' },
-  { name: 'VidSrc WTF', movie: 'https://www.vidsrc.wtf/api/3/movie/?id={id}', tv: 'https://vidsrc.wtf/api/3/tv/?id={id}&s={s}&e={e}' },
-];
+const DEFAULT_SOURCES = StreamPlayback.defaults;
 
 const DEFAULT_SPORTS_SOURCES = [
   { name: 'SportSRC', url: '' },  // Uses SportSRC API automatically
@@ -7099,6 +7099,8 @@ function getAppData() {
     watchlist: (() => { try { return JSON.parse(localStorage.getItem('aether_v2_watchlist')) || []; } catch(e) { return []; } })(),
     history: (() => { try { return JSON.parse(localStorage.getItem('aether_v2_history')) || []; } catch(e) { return []; } })(),
     sources: (() => { try { return JSON.parse(localStorage.getItem('aether_v4_sources')) || []; } catch(e) { return []; } })(),
+    sources_revision: Number(localStorage.getItem('sl_sources_revision')) || 0,
+    sources_removed: readSourceSetting('sl_sources_removed', []),
     sports_sources: (() => { try { return JSON.parse(localStorage.getItem('streamlocal_sports_sources')) || []; } catch(e) { return []; } })(),
     theme: localStorage.getItem('aether_v2_theme') || 'dark',
     style: localStorage.getItem('aether_v2_style') || 'new',
@@ -7134,8 +7136,8 @@ async function loadFromServer() {
   if (d.history?.length) {
     localStorage.setItem('aether_v2_history', JSON.stringify(d.history));
   }
-  if (d.sources?.length) {
-    localStorage.setItem('aether_v4_sources', JSON.stringify(d.sources));
+  if (Array.isArray(d.sources)) {
+    persistSourceCatalog(StreamPlayback.migrateSources(d.sources, { revision: d.sources_revision, removed: d.sources_removed || readSourceSetting('sl_sources_removed', []) }));
   }
   if (d.sports_sources?.length) {
     localStorage.setItem('streamlocal_sports_sources', JSON.stringify(d.sports_sources));
@@ -7154,6 +7156,8 @@ async function loadFromServer() {
   if (d.searches?.length) {
     localStorage.setItem('sl_search_recents', JSON.stringify(d.searches));
   }
+  loadSources();
+  if (Array.isArray(d.sources) && d.sources_revision !== StreamPlayback.revision) await syncToServer();
   updateProfileButton();
 }
 
@@ -7393,19 +7397,37 @@ function resetIdleTimer() {
 }
 
 /* ===== SOURCES MANAGEMENT ===== */
-function loadSources() {
-  const stored = localStorage.getItem('aether_v4_sources');
-  if (stored) {
-    try { SOURCES = JSON.parse(stored); } catch (e) { SOURCES = [...DEFAULT_SOURCES]; }
-  } else {
-    SOURCES = [...DEFAULT_SOURCES];
+function readSourceSetting(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (_) { return fallback; }
+}
+
+function persistSourceCatalog(catalog) {
+  const previous = Number(localStorage.getItem('sl_sources_revision')) || 0;
+  if (previous < catalog.revision && DEFAULT_SOURCES.some(src => src.name === localStorage.getItem('aether_v2_last_source'))) {
+    localStorage.removeItem('aether_v2_last_source');
   }
-  if (SOURCES.length === 0) SOURCES = [...DEFAULT_SOURCES];
+  localStorage.setItem('aether_v4_sources', JSON.stringify(catalog.sources));
+  localStorage.setItem('sl_sources_revision', String(catalog.revision));
+  localStorage.setItem('sl_sources_removed', JSON.stringify(catalog.removed));
+}
+
+function loadSources() {
+  const selected = SOURCES[currentSrc];
+  const catalog = StreamPlayback.migrateSources(readSourceSetting('aether_v4_sources', null), {
+    revision: localStorage.getItem('sl_sources_revision'),
+    removed: readSourceSetting('sl_sources_removed', [])
+  });
+  SOURCES = catalog.sources;
+  persistSourceCatalog(catalog);
+  if (selected) {
+    const index = SOURCES.findIndex(src => selected.id ? src.id === selected.id : src.name === selected.name);
+    currentSrc = index < 0 ? 0 : index;
+  }
   renderSourceSettings();
 }
 
 function saveSources() {
-  localStorage.setItem('aether_v4_sources', JSON.stringify(SOURCES));
+  persistSourceCatalog({ sources: SOURCES, revision: StreamPlayback.revision, removed: readSourceSetting('sl_sources_removed', []) });
   renderSourceSettings();
   syncToServer();
 }
@@ -7447,13 +7469,20 @@ function addCustomSource() {
 }
 
 function deleteSource(index) {
+  const source = SOURCES[index];
+  if (source?.id) {
+    const removed = new Set(readSourceSetting('sl_sources_removed', []));
+    removed.add(source.id);
+    localStorage.setItem('sl_sources_removed', JSON.stringify([...removed]));
+  }
   SOURCES.splice(index, 1);
   if (SOURCES.length === 0) SOURCES = [...DEFAULT_SOURCES];
   saveSources();
 }
 
 function resetSources() {
-  SOURCES = [...DEFAULT_SOURCES];
+  localStorage.setItem('sl_sources_removed', '[]');
+  SOURCES = DEFAULT_SOURCES.map(src => ({ ...src }));
   saveSources();
 }
 
@@ -7530,7 +7559,7 @@ function loadPlaybackSettings() {
   const autoSkip = localStorage.getItem('sl_auto_skip') !== 'false'; // default true
   document.getElementById('setting-auto-skip').checked = autoSkip;
 
-  const timeout = parseInt(localStorage.getItem('sl_skip_timeout')) || 8000;
+  const timeout = getSkipTimeout();
   const sel = document.getElementById('setting-skip-timeout');
   if (sel) sel.value = String(timeout);
 }
@@ -7556,7 +7585,8 @@ function getAutoSkip() {
 }
 
 function getSkipTimeout() {
-  return parseInt(localStorage.getItem('sl_skip_timeout')) || 8000;
+  const value = Number.parseInt(localStorage.getItem('sl_skip_timeout'), 10);
+  return [0, 5000, 8000, 12000, 20000].includes(value) ? value : 8000;
 }
 
 /* ===== ANNOUNCEMENT POPUPS ===== */
@@ -7832,6 +7862,10 @@ function showSportsPlayerHint() {
 
 /* ===== SPORTS PLAYER ===== */
 function openSportsGame(gameId) {
+  ++mediaRequestId;
+  playbackMonitor.stop();
+  clearTimeout(failoverTimer);
+  showPlaybackNotice('');
   const game = SPORTS_GAMES.find(g => g.game_id === gameId) || SPORTS_GAMES[0];
   if (!game) return alert("Game not found.");
 
@@ -7974,6 +8008,8 @@ function exportProfile() {
   const data = {
     tmdb_key: localStorage.getItem('tmdb_key'),
     aether_v4_sources: localStorage.getItem('aether_v4_sources'),
+    sl_sources_revision: localStorage.getItem('sl_sources_revision'),
+    sl_sources_removed: localStorage.getItem('sl_sources_removed'),
     aether_v2_history: localStorage.getItem('aether_v2_history'),
     aether_v2_watchlist: localStorage.getItem('aether_v2_watchlist'),
     aether_v2_last_source: localStorage.getItem('aether_v2_last_source'),
@@ -7997,6 +8033,12 @@ function importProfile(e) {
       if (data.tmdb_key) localStorage.setItem('tmdb_key', data.tmdb_key);
       if (data.aether_v4_sources) localStorage.setItem('aether_v4_sources', data.aether_v4_sources);
       else if (data.aether_v3_sources) localStorage.setItem('aether_v4_sources', data.aether_v3_sources); // Migration
+      if (data.aether_v4_sources || data.aether_v3_sources) {
+        persistSourceCatalog(StreamPlayback.migrateSources(readSourceSetting('aether_v4_sources', null), {
+          revision: Number(data.sl_sources_revision) || 0,
+          removed: data.sl_sources_removed ? JSON.parse(data.sl_sources_removed) : []
+        }));
+      }
       if (data.aether_v2_history) localStorage.setItem('aether_v2_history', data.aether_v2_history);
       if (data.aether_v2_watchlist) localStorage.setItem('aether_v2_watchlist', data.aether_v2_watchlist);
       if (data.aether_v2_last_source) localStorage.setItem('aether_v2_last_source', data.aether_v2_last_source);
@@ -9172,6 +9214,55 @@ function loadHistory() {
   
 <script>
 /* ===== MANUAL & PLAYER ===== */
+let mediaRequestId = 0;
+let triedPlaybackSources = new Set();
+let playbackContentKey = '';
+const playbackMonitor = StreamPlayback.createMonitor({
+  onState(state, message) {
+    if (state === 'ready') document.getElementById('embed-loading').style.display = 'none';
+    if (state === 'playing' && SOURCES[currentSrc]) localStorage.setItem('aether_v2_last_source', SOURCES[currentSrc].name);
+    showPlaybackNotice(message, state === 'unverified' ? skipSource : null);
+  },
+  onFailure(reason) {
+    if (!document.getElementById('player-overlay').classList.contains('open')) return;
+    if (!getAutoSkip()) {
+      document.getElementById('embed-loading').style.display = 'none';
+      showPlaybackNotice(reason, skipSource);
+      return;
+    }
+    tryNextPlaybackSource(reason);
+  }
+});
+window.addEventListener('message', event => playbackMonitor.message(event));
+
+function showPlaybackNotice(message, action = null) {
+  const notice = document.getElementById('playback-status');
+  notice.textContent = message;
+  notice.style.display = message ? 'block' : 'none';
+  if (action) {
+    const button = document.createElement('button');
+    button.textContent = 'Try next source';
+    button.onclick = action;
+    notice.appendChild(button);
+  }
+}
+
+function tryNextPlaybackSource(reason) {
+  for (let step = 1; step <= SOURCES.length; step++) {
+    const index = (currentSrc + step) % SOURCES.length;
+    if (!triedPlaybackSources.has(index)) { switchSource(index, true); return; }
+  }
+  playbackMonitor.stop();
+  stopNextEpTracking();
+  document.getElementById('embed-loading').style.display = 'none';
+  showPlaybackNotice('No source started this title. Choose a server or try again.', () => {
+    triedPlaybackSources.clear();
+    switchSource(0);
+  });
+  const button = document.querySelector('#playback-status button');
+  if (button) button.textContent = 'Try again';
+}
+
 let playerOpenTime = 0;
 let nextEpProgressTimer = null;
 const TV_ESTIMATED_SECONDS = 2700; // default 45 min for TV episodes (used when we can't detect actual video progress inside cross-origin iframes)
@@ -9183,6 +9274,10 @@ function buildStreamUrl(srcObj, type, id, s, e) {
 }
 
 async function openMedia(id, type, inS = null, inE = null) {
+  const requestId = ++mediaRequestId;
+  if (currentMode === 'sports') switchMode('home');
+  playbackMonitor.stop();
+  triedPlaybackSources.clear();
   stopNextEpTracking();
   playerOpenTime = Date.now();
   document.body.style.overflow = 'hidden'; // prevent background scrolling
@@ -9221,6 +9316,7 @@ async function openMedia(id, type, inS = null, inE = null) {
 
   if (TMDB_KEY) {
     const d = await tmdb(`/${type}/${id}`);
+    if (requestId !== mediaRequestId) return;
     if (d) {
       currentMedia.meta = d;
       if (type === 'tv' && d.seasons) {
@@ -9278,55 +9374,48 @@ function renderPlayerPanel() {
 }
 
 function loadEmbed() {
+  playbackMonitor.stop();
+  clearTimeout(failoverTimer);
   if (SOURCES.length === 0) return alert("No sources available! Check settings.");
+  const contentKey = `${currentMedia.type}:${currentMedia.id}:${currentSeason}:${currentEp}`;
+  if (contentKey !== playbackContentKey) {
+    playbackContentKey = contentKey;
+    triedPlaybackSources.clear();
+  }
+  triedPlaybackSources.add(currentSrc);
   const src = SOURCES[currentSrc];
   const url = buildStreamUrl(src, currentMedia.type, currentMedia.id, currentSeason, currentEp);
+  if (!url) { tryNextPlaybackSource('No URL for this title.'); return; }
 
-  if (!url) { skipSource(); return; } // if template is empty
-
-  const iframe = document.getElementById('player-iframe');
+  // Each navigation gets a fresh window, isolating late events from the previous attempt.
+  const previous = document.getElementById('player-iframe');
+  const iframe = previous.cloneNode(false);
+  previous.onload = previous.onerror = null;
+  iframe.removeAttribute('src');
+  previous.replaceWith(iframe);
   const loading = document.getElementById('embed-loading');
-  const status = document.getElementById('embed-status');
   loading.style.display = 'flex';
-  status.innerHTML = `<span style="opacity:0.5;">Source ${currentSrc+1}/${SOURCES.length}</span> &nbsp; Connecting to <strong>${src.name}</strong>...`;
+  showPlaybackNotice('');
+  document.getElementById('embed-status').textContent = `Source ${currentSrc + 1}/${SOURCES.length} · Connecting to ${src.name}...`;
+  playbackMonitor.start({ url, frame: iframe, media: currentMedia, timeout: getSkipTimeout(), autoSkip: getAutoSkip() });
+  iframe.onload = () => { if (document.getElementById('player-iframe') === iframe) playbackMonitor.loaded(); };
+  iframe.onerror = () => { if (document.getElementById('player-iframe') === iframe) playbackMonitor.error(); };
   iframe.src = url;
-
-  clearTimeout(failoverTimer);
-  iframe.onload = () => {
-    loading.style.display = 'none';
-  };
-
-  const skipTimeout = getSkipTimeout();
-  if (skipTimeout > 0 && getAutoSkip()) {
-    failoverTimer = setTimeout(() => {
-      if (loading.style.display !== 'none') {
-        status.innerHTML = `<span style="color:var(--accent);">⚠️ ${src.name} didn't load</span> &nbsp; Trying next source...`;
-        setTimeout(skipSource, 1200);
-      }
-    }, skipTimeout);
-  }
-
-  // Start next-episode auto-detection (TV only, estimate-based)
   startNextEpTracking();
 }
 
-
-function switchSource(idx) {
+function switchSource(idx, automatic = false) {
+  if (!SOURCES[idx]) return;
+  if (!automatic) triedPlaybackSources.clear();
   currentSrc = idx;
-  if (SOURCES[idx]) {
-    localStorage.setItem('aether_v2_last_source', SOURCES[idx].name);
-  }
+  if (!automatic) localStorage.setItem('aether_v2_last_source', SOURCES[idx].name);
   renderPlayerPanel();
   loadEmbed();
 }
 
 function skipSource() {
-  if (currentMode === 'sports') {
-    skipSportsSource();
-  } else {
-    currentSrc = (currentSrc + 1) % SOURCES.length;
-    switchSource(currentSrc);
-  }
+  if (currentMode === 'sports') skipSportsSource();
+  else switchSource((currentSrc + 1) % SOURCES.length);
 }
 
 function changeSeason(s) {
@@ -9378,6 +9467,10 @@ function nextEpisode() {
 }
 
 function closePlayer() {
+  ++mediaRequestId;
+  playbackMonitor.stop();
+  clearTimeout(failoverTimer);
+  showPlaybackNotice('');
   stopNextEpTracking();
   const overlay = document.getElementById('player-overlay');
   overlay.classList.remove('open', 'inactive', 'fullscreen', 'sports-mode');
